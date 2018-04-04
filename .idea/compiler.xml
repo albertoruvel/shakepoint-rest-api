@@ -30,7 +30,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel target="1.7">
       <module name="dareu-web" target="1.8" />
-      <module name="shakepoint-api" target="1.5" />
+      <module name="shakepoint-api" target="1.8" />
       <module name="shakepoint-machine-connector" target="1.5" />
       <module name="shakepoint-web" target="1.5" />
     </bytecodeTargetLevel>

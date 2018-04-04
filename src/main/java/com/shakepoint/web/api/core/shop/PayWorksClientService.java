@@ -39,7 +39,7 @@ public class PayWorksClientService {
 
     @Inject
     @ApplicationProperty(name = "com.shakepoint.web.admin.banorte.debugMode", type = ApplicationProperty.Types.SYSTEM)
-    private Boolean debug;
+    private String debug;
 
     @Inject
     @ApplicationProperty(name = "com.shakepoint.web.admin.banorte.cnfFile", type = ApplicationProperty.Types.SYSTEM)
@@ -62,7 +62,7 @@ public class PayWorksClientService {
     public PaymentDetails authorizePayment(String cardNumber, String cardExpDate, String cvv, double amount){
         PaymentDetails details;
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        if (debug){
+        if (Boolean.parseBoolean(debug)){
             log.info("DEBUG purchase have been created");
             details = new PaymentDetails("testAuthCode", dateFormat.format(new Date()), dateFormat.format(new Date()),
                     "123123", "123123123", "A", "Test purchase have been accepted");
