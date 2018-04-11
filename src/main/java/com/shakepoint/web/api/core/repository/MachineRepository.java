@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.core.repository;
 
 
+import com.shakepoint.web.api.data.entity.VendingConnection;
 import com.shakepoint.web.api.data.entity.VendingMachine;
 import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 
@@ -45,4 +46,6 @@ public interface MachineRepository {
     public boolean isMachineAlerted(String id);
 
     public List<VendingMachine> searchByName(String machineName);
+
+    public VendingConnection getVendingConnection(String id);
 }

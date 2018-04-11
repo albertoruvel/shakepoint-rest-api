@@ -4,11 +4,13 @@ public class AuthenticationResponse {
     private String message;
     private String authenticationToken;
     private boolean success;
+    private String role;
 
-    public AuthenticationResponse(String message, String authenticationToken, boolean success) {
+    public AuthenticationResponse(String message, String authenticationToken, boolean success, String role) {
         this.message = message;
         this.authenticationToken = authenticationToken;
         this.success = success;
+        this.role = role;
     }
 
     public AuthenticationResponse(String message){
@@ -41,5 +43,13 @@ public class AuthenticationResponse {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

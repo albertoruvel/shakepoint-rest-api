@@ -6,6 +6,7 @@ import com.shakepoint.web.api.core.service.email.EmailSender;
 import com.shakepoint.web.api.core.service.email.Template;
 import com.shakepoint.web.api.core.service.security.AuthenticationService;
 import com.shakepoint.web.api.core.service.security.CryptoService;
+import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.SignInRequest;
@@ -48,9 +49,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             //check password
             if (request.getPassword().equals(adminPassword)){
                 //create a response with pre-defined token
-                return Response.ok(new AuthenticationResponse("Welcome your majesty", adminToken, true)).build();
+                return Response.ok(new AuthenticationResponse("Welcome your majesty", adminToken, true, SecurityRole.ADMIN.getValue())).build();
             }else {
-                return Response.ok(new AuthenticationResponse("Invalid credentials ", null, false))
+                return Response.ok(new AuthenticationResponse("Invalid credentials "))
                         .build();
             }
         }
@@ -61,9 +62,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (cryptoService.encrypt(request.getPassword()).equals(user.getPassword())) {
                 //generate a new token
                 String token = ShakeUtils.getNextSessionToken();
+                //check role
+                final String role = user.getRole();
+                SecurityRole securityRole = SecurityRole.fromString(role);
                 //save it
                 userRepository.saveUserToken(user.getId(), token);
-                return Response.ok(new AuthenticationResponse("Welcome to Shakepoint", token, true))
+                return Response.ok(new AuthenticationResponse("Welcome to Shakepoint", token, true, securityRole.getValue()))
                         .build();
             } else {
                 return Response.ok(new AuthenticationResponse("Invalid credentials"))

@@ -22,5 +22,6 @@ public interface PayWorksClient {
             @Field(value = "SECURITY_CODE") String cvv,
             @Field(value = "ENTRY_MODE") String entryMode,
             @Field(value = "RESPONSE_LANGUAGE") String responseLanguage,
-            @Field(value = "TERMINAL_ID") String terminalId);
+            @Field(value = "TERMINAL_ID") String terminalId,
+            @Field(value = "CONTROL_NUMBER")String controlNumber);
 }

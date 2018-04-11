@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.core.repository.impl;
 
 import com.shakepoint.web.api.core.repository.UserRepository;
+import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
 import com.shakepoint.web.api.data.entity.User;
@@ -129,7 +130,8 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getTechnicians() {
         try {
-            return em.createQuery("SELECT u FROM User u WHERE u.role = 'technician'").getResultList();
+            return em.createQuery("SELECT u FROM User u WHERE u.role = :role")
+                    .setParameter("role", SecurityRole.PARTNER.getValue()).getResultList();
         } catch (Exception ex) {
             log.error("Could not get Technicians", ex);
             return null;
@@ -154,7 +156,8 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User getTechnician(String id) {
         try {
-            return (User) em.createQuery("SELECT u FROM User u WHERE u.id = :id AND u.role = 'technician'")
+            return (User) em.createQuery("SELECT u FROM User u WHERE u.id = :id AND u.role = :role")
+                    .setParameter("role", SecurityRole.PARTNER.getValue())
                     .setParameter("id", id).getSingleResult();
         } catch (Exception ex) {
             log.error("Could not get technician", ex);
@@ -180,7 +183,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void addShakepointUser(User user) {
         try {
             em.persist(user);

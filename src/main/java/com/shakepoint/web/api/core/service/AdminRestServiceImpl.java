@@ -2,6 +2,7 @@ package com.shakepoint.web.api.core.service;
 
 import com.github.roar109.syring.annotation.ApplicationProperty;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
+import com.shakepoint.web.api.core.exception.MandatoryFieldException;
 import com.shakepoint.web.api.core.machine.MachineMessageCode;
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.repository.MachineRepository;
@@ -87,7 +88,8 @@ public class AdminRestServiceImpl implements AdminRestService {
         NewProductRequest product = TransformationUtils.createProductRequestFromMultipart(multipart);
         if (product != null) {
             //validate product
-            if (ValidationUtils.validateProduct(product)) {
+            try{
+                ValidationUtils.validateProduct(product);
                 Product productEntity = new Product();
                 productEntity.setType(ProductType.getProductType(product.getProductType()));
                 productEntity = TransformationUtils.createProductFromDto(product);
@@ -96,8 +98,9 @@ public class AdminRestServiceImpl implements AdminRestService {
                 jmsHandler.send(NUTRITIONAL_DATA_QUEUE_NAME, productEntity.getId());
                 //return success
                 return Response.ok().build();
-            } else {
+            }catch(MandatoryFieldException ex){
                 //return validation error
+                log.error("Could not create product due to mandatory field is missing", ex);
                 return Response.status(Response.Status.BAD_REQUEST)
                         .build();
             }
@@ -137,7 +140,7 @@ public class AdminRestServiceImpl implements AdminRestService {
     public Response getMachines() {
         try {
             List<VendingMachine> list = machineRepository.getMachines();
-            List<SimpleMachine> simpleMachines = TransformationUtils.createSimpleMachines(list);
+            List<SimpleMachine> simpleMachines = TransformationUtils.createSimpleMachines(list, machineRepository);
             return Response.ok(simpleMachines).build();
         } catch (Exception ex) {
             log.error("Error: " + ex.getMessage());
@@ -249,7 +252,7 @@ public class AdminRestServiceImpl implements AdminRestService {
     @Override
     public Response getPartnerMachines(String techId) {
         List<VendingMachine> list = machineRepository.getTechnicianMachines(techId);
-        List<SimpleMachine> dtoList = TransformationUtils.createSimpleMachines(list);
+        List<SimpleMachine> dtoList = TransformationUtils.createSimpleMachines(list, machineRepository);
         return Response.ok(dtoList).build();
     }
 
@@ -260,9 +263,9 @@ public class AdminRestServiceImpl implements AdminRestService {
         User dto = userRepository.getTechnician(technicianId);
         content.setTechnician(TransformationUtils.createTechnician(dto));
         List<VendingMachine> allMachines = machineRepository.getMachines();
-        content.setAllMachines(TransformationUtils.createSimpleMachines(allMachines));
+        content.setAllMachines(TransformationUtils.createSimpleMachines(allMachines, machineRepository));
         List<VendingMachine> assignedMachines = machineRepository.getTechnicianMachines(technicianId);
-        content.setAsignedMachines(TransformationUtils.createSimpleMachines(assignedMachines));
+        content.setAsignedMachines(TransformationUtils.createSimpleMachines(assignedMachines, machineRepository));
         return Response.ok(content).build();
     }
 

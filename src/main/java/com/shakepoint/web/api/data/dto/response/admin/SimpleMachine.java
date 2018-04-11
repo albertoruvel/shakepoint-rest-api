@@ -4,14 +4,35 @@ public class SimpleMachine {
     private String id;
     private String name;
     private String description;
-
+    private String partnerName;
+    private int workingPort;
+    private boolean active;
     public SimpleMachine() {
     }
 
-    public SimpleMachine(String id, String name, String description) {
+    public SimpleMachine(String id, String name, String description, String partnerName, int workingPort, boolean active) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.partnerName = partnerName;
+        this.workingPort = workingPort;
+        this.active = active;
+    }
+
+    public String getPartnerName() {
+        return partnerName;
+    }
+
+    public void setPartnerName(String partnerName) {
+        this.partnerName = partnerName;
+    }
+
+    public int getWorkingPort() {
+        return workingPort;
+    }
+
+    public void setWorkingPort(int workingPort) {
+        this.workingPort = workingPort;
     }
 
     public String getId() {

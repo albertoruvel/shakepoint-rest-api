@@ -76,7 +76,7 @@ public class TransformationUtils {
         machine.setDescription(dto.getDescription());
         machine.setName(dto.getName());
 
-        machine.setLocation(dto.getLocation().replace("(", "\u0000").replace(")", "\u0000"));
+        machine.setLocation(dto.getLocation());
         machine.setActive(false);
         machine.setError(false);
         machine.setSlots(6);
@@ -111,10 +111,13 @@ public class TransformationUtils {
         return products;
     }
 
-    public static List<SimpleMachine> createSimpleMachines(List<VendingMachine> page) {
+    public static List<SimpleMachine> createSimpleMachines(List<VendingMachine> page, MachineRepository machineRepository) {
         List<SimpleMachine> machines = new ArrayList();
+        VendingConnection conn = null;
         for (VendingMachine m : page) {
-            machines.add(new SimpleMachine(m.getId(), m.getName(), m.getDescription()));
+            conn = machineRepository.getVendingConnection(m.getId());
+            machines.add(new SimpleMachine(m.getId(), m.getName(), m.getDescription(), m.getTechnician().getName(),
+                    conn.getPort(), conn.getActive()));
         }
 
         return machines;
@@ -149,7 +152,7 @@ public class TransformationUtils {
     }
 
     public static SimpleProduct createSimpleProduct(Product p) {
-        return new SimpleProduct(p.getId(), p.getName(), p.getCreationDate(), p.getPrice(), p.getLogoUrl());
+        return new SimpleProduct(p.getId(), p.getName(), p.getCreationDate(), p.getPrice(), p.getLogoUrl(), p.getDescription());
     }
 
     public static List<PurchaseCodeResponse> createPurchaseCodes(List<Purchase> activeCodes) {

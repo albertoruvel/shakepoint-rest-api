@@ -28,6 +28,11 @@
             <version>1.2.17</version>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.roar109</groupId>
             <artifactId>syring</artifactId>
             <version>1.0.1</version>

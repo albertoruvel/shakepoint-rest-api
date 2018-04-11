@@ -3,9 +3,7 @@ package com.shakepoint.web.api.core.factory;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import org.apache.log4j.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
