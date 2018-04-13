@@ -111,6 +111,14 @@ public class TransformationUtils {
         return products;
     }
 
+    public static List<SimpleProduct> createSimpleProductsFromStatus(List<VendingMachineProductStatus> products){
+        List<SimpleProduct> list = new ArrayList();
+        for (VendingMachineProductStatus status : products){
+            list.add(createSimpleProduct(status.getProduct()));
+        }
+        return list;
+    }
+
     public static List<SimpleMachine> createSimpleMachines(List<VendingMachine> page, MachineRepository machineRepository) {
         List<SimpleMachine> machines = new ArrayList();
         VendingConnection conn = null;

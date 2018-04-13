@@ -9,11 +9,13 @@ package com.shakepoint.web.api.core.repository.impl;
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.repository.ProductRepository;
 import com.shakepoint.web.api.data.entity.Product;
+import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 import org.apache.log4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -80,14 +82,14 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<Product> getMachineProducts(String machineId) {
+    public List<VendingMachineProductStatus> getMachineProducts(String machineId) {
         try {
-            return em.createQuery("SELECT p FROM Product p WHERE p.machineId = :machineId")
+            return em.createQuery("SELECT p FROM MachineProductStatus p WHERE p.machine.id = :machineId")
                     .setParameter("machineId", machineId)
                     .getResultList();
         } catch (Exception ex) {
             log.error("Could not get machine products", ex);
-            return null;
+            return Collections.emptyList();
         }
     }
 
