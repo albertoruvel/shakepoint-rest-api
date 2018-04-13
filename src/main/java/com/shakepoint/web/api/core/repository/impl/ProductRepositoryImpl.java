@@ -82,7 +82,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> getMachineProducts(String machineId) {
         try {
-            return em.createNativeQuery("SELECT p FROM Product p WHERE p.machineId = :machineId")
+            return em.createQuery("SELECT p FROM Product p WHERE p.machineId = :machineId")
                     .setParameter("machineId", machineId)
                     .getResultList();
         } catch (Exception ex) {
