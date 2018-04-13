@@ -168,9 +168,10 @@ public class AdminRestServiceImpl implements AdminRestService {
     @Override
     public Response getMachineProducts(String machineId) {
         try {
+            VendingMachine machine = machineRepository.getMachine(machineId);
             List<VendingMachineProductStatus> list = productRepository.getMachineProducts(machineId);
             List<VendingProductDetails> dtoList = TransformationUtils.createVendingProductDetailsFromStatus(list);
-            return Response.ok(dtoList).build();
+            return Response.ok(new GetVendingProducts(dtoList, machine.getName())).build();
         } catch (Exception ex) {
             log.error("Could not get machine products", ex);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
