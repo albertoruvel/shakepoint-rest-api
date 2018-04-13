@@ -29,7 +29,7 @@ public class TransformationUtils {
 
     public static Product createProductFromDto(NewProductRequest product) {
         Product p = new Product();
-        try{
+        try {
             p.setName(product.getName());
             p.setCreationDate(ShakeUtils.DATE_FORMAT.format(new Date()));
             p.setDescription(new String(product.getDescription().getBytes(), "UTF-8"));
@@ -37,7 +37,7 @@ public class TransformationUtils {
             p.setPrice(product.getPrice());
             p.setType(ProductType.getProductType(product.getProductType()));
             p.setEngineUseTime(product.getEngineUseTime());
-        }catch(UnsupportedEncodingException ex){
+        } catch (UnsupportedEncodingException ex) {
             log.info("Could not transform encoding", ex);
         }
         return p;
@@ -111,9 +111,22 @@ public class TransformationUtils {
         return products;
     }
 
-    public static List<SimpleProduct> createSimpleProductsFromStatus(List<VendingMachineProductStatus> products){
+    public static List<VendingProductDetails> createVendingProductDetailsFromStatus(List<VendingMachineProductStatus> products) {
+        List<VendingProductDetails> list = new ArrayList();
+        for (VendingMachineProductStatus status : products) {
+            list.add(createVendingProductDetails(status));
+        }
+        return list;
+    }
+
+    private static VendingProductDetails createVendingProductDetails(VendingMachineProductStatus status) {
+        return new VendingProductDetails(status.getId(), status.getProduct().getId(), status.getProduct().getLogoUrl(),
+                status.getSlotNumber(), status.getPercentage(), status.getProduct().getName());
+    }
+
+    public static List<SimpleProduct> createSimpleProductsFromStatus(List<VendingMachineProductStatus> products) {
         List<SimpleProduct> list = new ArrayList();
-        for (VendingMachineProductStatus status : products){
+        for (VendingMachineProductStatus status : products) {
             list.add(createSimpleProduct(status.getProduct()));
         }
         return list;
@@ -197,12 +210,12 @@ public class TransformationUtils {
 
     public static List<ProductDTO> createProducts(List<Product> entities) {
         List<ProductDTO> productsList = new ArrayList();
-        try{
+        try {
             for (Product p : entities) {
                 productsList.add(new ProductDTO(p.getId(), p.getName(), p.getPrice(), new String(p.getDescription().getBytes(), "UTF-8"), p.getLogoUrl(),
                         ProductType.getProductTypeForClient(p.getType()), p.getNutritionalDataUrl()));
             }
-        }catch(UnsupportedEncodingException ex){
+        } catch (UnsupportedEncodingException ex) {
             log.info("Could not transform encoding", ex);
         }
         return productsList;
@@ -211,7 +224,7 @@ public class TransformationUtils {
     public static List<UserPurchaseResponse> createPurchases(List<Purchase> purchases) {
         List<UserPurchaseResponse> ps = new ArrayList();
 
-        for (Purchase p : purchases){
+        for (Purchase p : purchases) {
             ps.add(new UserPurchaseResponse(p.getId(), p.getTotal(), p.getProduct().getName(), p.getMachine().getName(), p.getPurchaseDate()));
         }
         return ps;
@@ -220,13 +233,13 @@ public class TransformationUtils {
     public static List<ProductLevelDescription> createProductLevelDescriptions(List<VendingMachineProductStatus> products) {
         List<ProductLevelDescription> descriptions = new ArrayList();
 
-        for (VendingMachineProductStatus status : products){
+        for (VendingMachineProductStatus status : products) {
             descriptions.add(createProductLevelDescription(status));
         }
         return descriptions;
     }
 
-    public static ProductLevelDescription createProductLevelDescription(VendingMachineProductStatus status){
+    public static ProductLevelDescription createProductLevelDescription(VendingMachineProductStatus status) {
         return new ProductLevelDescription(
                 status.getPercentage() < 30 ? true : false,
                 status.getProduct().getId(),
@@ -237,7 +250,7 @@ public class TransformationUtils {
     }
 
     public static NewProductRequest createProductRequestFromMultipart(MultipartFormDataInput multipart) {
-        try(InputStream is = multipart.getFormDataPart("file", InputStream.class, null)){
+        try (InputStream is = multipart.getFormDataPart("file", InputStream.class, null)) {
             byte[] bytes = IOUtils.toByteArray(is);
             final String name = multipart.getFormDataPart("name", String.class, null);
             final Double price = multipart.getFormDataPart("price", Double.class, null);
@@ -246,7 +259,7 @@ public class TransformationUtils {
             final String engineUseTime = multipart.getFormDataPart("engineUseTime", String.class, null);
             final String productType = multipart.getFormDataPart("productType", String.class, null);
             return new NewProductRequest(name, price, description, logoUrl, engineUseTime, productType, bytes);
-        }catch(IOException ex){
+        } catch (IOException ex) {
             log.error("Could not extract data from multipart", ex);
             return null;
         }

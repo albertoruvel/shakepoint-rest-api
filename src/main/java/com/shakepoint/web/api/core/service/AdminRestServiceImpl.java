@@ -169,7 +169,7 @@ public class AdminRestServiceImpl implements AdminRestService {
     public Response getMachineProducts(String machineId) {
         try {
             List<VendingMachineProductStatus> list = productRepository.getMachineProducts(machineId);
-            List<SimpleProduct> dtoList = TransformationUtils.createSimpleProductsFromStatus(list);
+            List<VendingProductDetails> dtoList = TransformationUtils.createVendingProductDetailsFromStatus(list);
             return Response.ok(dtoList).build();
         } catch (Exception ex) {
             log.error("Could not get machine products", ex);
