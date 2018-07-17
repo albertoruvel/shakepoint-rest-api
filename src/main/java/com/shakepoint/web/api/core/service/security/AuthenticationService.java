@@ -8,4 +8,6 @@ import javax.ws.rs.core.Response;
 public interface AuthenticationService {
     public Response authenticate(SignInRequest request);
     public Response signUp(SignupRequest request);
+
+    public Response forgotPassword(String email);
 }

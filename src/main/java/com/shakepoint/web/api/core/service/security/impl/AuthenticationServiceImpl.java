@@ -12,6 +12,7 @@ import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.SignInRequest;
 import com.shakepoint.web.api.data.dto.request.SignupRequest;
 import com.shakepoint.web.api.data.dto.response.AuthenticationResponse;
+import com.shakepoint.web.api.data.dto.response.ForgotPasswordResponse;
 import com.shakepoint.web.api.data.entity.User;
 
 import javax.inject.Inject;
@@ -45,12 +46,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public Response authenticate(SignInRequest request) {
         //check first if is admin
-        if (request.getEmail().equalsIgnoreCase(adminEmail)){
+        if (request.getEmail().equalsIgnoreCase(adminEmail)) {
             //check password
-            if (request.getPassword().equals(adminPassword)){
+            if (request.getPassword().equals(adminPassword)) {
                 //create a response with pre-defined token
                 return Response.ok(new AuthenticationResponse("Welcome your majesty", adminToken, true, SecurityRole.ADMIN.getValue())).build();
-            }else {
+            } else {
                 return Response.ok(new AuthenticationResponse("Invalid credentials "))
                         .build();
             }
@@ -102,5 +103,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             emailSender.sendEmail(request.getEmail(), Template.SIGN_UP, parameters);
             return Response.ok(ar).build();
         }
+    }
+
+    @Override
+    public Response forgotPassword(String email) {
+        if (email == null || email.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ForgotPasswordResponse("No email was provided")).build();
+        }
+        //get user by email
+        User user = userRepository.getUserByEmail(email);
+        if (user == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ForgotPasswordResponse("The provided email is invalid")).build();
+        }
+
+        //create a new token
+        return null;
     }
 }
