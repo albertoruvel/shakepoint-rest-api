@@ -12,10 +12,6 @@ import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 
 import java.util.List;
 
-/**
- *
- * @author Alberto Rubalcaba
- */
 public interface ProductRepository {
     public List<Product> getProducts();
     public void createProduct(Product p);

@@ -11,10 +11,6 @@ import com.shakepoint.web.api.data.entity.UserProfile;
 
 import java.util.List;
 
-/**
- *
- * @author Alberto Rubalcaba
- */
 public interface UserRepository {
     public User getUserByEmail(String email);
     public List<User> getTechnicians();
@@ -38,4 +34,5 @@ public interface UserRepository {
     User findUserByToken(String token);
 
     public void saveUserToken(String id, String token);
+    public User get(String id);
 }

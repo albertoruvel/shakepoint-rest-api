@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("partner")
-@AllowedUsers(securityRoles = SecurityRole.PARTNER)
+@AllowedUsers(securityRoles = { SecurityRole.PARTNER, SecurityRole.ADMIN })
 @Secured
 public class PartnerResource {
 

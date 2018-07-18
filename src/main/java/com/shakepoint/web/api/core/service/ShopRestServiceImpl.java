@@ -1,29 +1,27 @@
 package com.shakepoint.web.api.core.service;
 
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
+import com.shakepoint.web.api.core.machine.ProductType;
+import com.shakepoint.web.api.core.machine.PurchaseStatus;
 import com.shakepoint.web.api.core.repository.MachineRepository;
 import com.shakepoint.web.api.core.repository.ProductRepository;
 import com.shakepoint.web.api.core.repository.PurchaseRepository;
 import com.shakepoint.web.api.core.repository.UserRepository;
 import com.shakepoint.web.api.core.service.email.EmailAsyncSender;
+import com.shakepoint.web.api.core.service.email.Template;
 import com.shakepoint.web.api.core.service.security.AuthenticatedUser;
 import com.shakepoint.web.api.core.service.security.RequestPrincipal;
 import com.shakepoint.web.api.core.shop.PayWorksClientService;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
-import com.shakepoint.web.api.data.dto.response.MachineSearch;
-import com.shakepoint.web.api.data.dto.response.ProductDTO;
-import com.shakepoint.web.api.data.dto.response.PurchaseCodeResponse;
-import com.shakepoint.web.api.data.entity.Product;
-import com.shakepoint.web.api.data.entity.VendingMachine;
-import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
+import com.shakepoint.web.api.data.dto.response.*;
+import com.shakepoint.web.api.data.entity.*;
 import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ShopRestServiceImpl implements ShopRestService {
 
@@ -110,37 +108,141 @@ public class ShopRestServiceImpl implements ShopRestService {
 
     @Override
     public Response confirmPurchase(ConfirmPurchaseRequest request) {
-        return null;
+        PurchaseQRCode code = null;
+        Purchase purchase = purchaseRepository.getPurchase(request.getPurchaseId());
+        User user;
+        if (purchase == null) {
+            LOG.error(String.format("No purchase found for %s", request.getPurchaseId()));
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new PurchaseQRCode(null, false, "No se ha podido encontrar la compra para la máquina que se especificó"))
+                    .build();
+        } else if (purchase.getStatus() == PurchaseStatus.AUTHORIZED || purchase.getStatus() == PurchaseStatus.CASHED) {
+            //trying to buy  a purchase with another status
+            LOG.info("Trying to buy an already authorized or cashed purchase");
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new PurchaseQRCode(null, false, "La compra especificada ya ha sido comprada por alguien mas, refresca los productos y vuelve a intentar"))
+                    .build();
+        } else {
+            user = userRepository.get(authenticatedUser.getId());
+            final String controlNumber = createControlNumber();
+            purchase.setControlNumber(controlNumber);
+            //update purchase
+            purchaseRepository.update(purchase);
+            PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber(),
+                    request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
+            if (paymentDetails == null) {
+                LOG.info("No payment details from payworks");
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new PurchaseQRCode(null, false, "Ha ocurrido un problema al realizar el pago, intenta nuevamente"))
+                        .build();
+            } else if (paymentDetails.getAuthCode() != null && paymentDetails.getPayworksResult().equals("A")) {
+                //check if purchase already contains a qr code
+                if (purchase.getQrCodeUrl() == null) {
+                    //try to retry upload for purchase
+                    jmsHandler.send(RETRY_UPLOAD_QUEUE_NAME, purchase.getId());
+                }
+                //payment went well
+                purchase.setUser(user);
+                purchase.setStatus(PurchaseStatus.AUTHORIZED);
+                purchase.setReference(paymentDetails.getReference());
+                purchaseRepository.update(purchase);
+                //send an email
+                List<String> productNames = new ArrayList();
+                productNames.add(purchase.getProduct().getName());
+                Map<String, Object> args = new HashMap();
+                args.put("productNames", productNames);
+                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, args);
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, "Compra realizada con éxito")).build();
+            } else if (paymentDetails.getPayworksResult().equals("D")) {
+                //declined
+                LOG.info("Declined");
+                return Response.ok(new PurchaseQRCode(null, false, "La tarjeta proporcionada ha sido declinada"))
+                        .build();
+            } else if (paymentDetails.getPayworksResult().equals("T")) {
+                LOG.info("Timeout on provider");
+                return Response.ok(new PurchaseQRCode(null, false, "No se ha obtenido respuesta del autorizador, revisa los datos e intenta nuevamente")).build();
+            } else {
+                LOG.info("Rejected");
+                return Response.ok(new PurchaseQRCode(null, false, "La tarjeta proporcionada ha sido rechazada")).build();
+            }
+        }
     }
 
     @Override
     public Response getUserPurchases() {
-        return null;
+        List<Purchase> purchases = purchaseRepository.getUserPurchases(authenticatedUser.getId());
+        List<UserPurchaseResponse> response = TransformationUtils.createPurchases(purchases);
+        return Response.ok(response).build();
     }
 
     @Override
     public Response getUserProfile() {
-        return null;
+        final User user = userRepository.get(authenticatedUser.getId());
+        UserProfileResponse profile = null;
+        try {
+            UserProfile userProfile = userRepository.getUserProfile(user.getId());
+            if (userProfile == null) {
+                profile = new UserProfileResponse(user.getName(), user.getId(), user.getCreationDate(), false, null, 0.0, 0.0, 0.0, user.getEmail());
+            } else {
+                profile = TransformationUtils.createUserProfile(userProfile);
+            }
+        } catch (Exception ex) {
+
+        }
+        return Response.ok(profile).build();
     }
 
     @Override
     public Response saveProfile(UserProfileRequest request) {
-        return null;
+        //get user id
+        final User user = userRepository.get(authenticatedUser.getId());
+        //get profile
+        UserProfile existingProfile = userRepository.getUserProfile(authenticatedUser.getId());
+        if (existingProfile == null) {
+            UserProfile profile = TransformationUtils.getProfile(authenticatedUser.getId(), request);
+            profile.setUser(user);
+            LOG.info("Creating user profile");
+            userRepository.saveProfile(profile);
+        } else {
+            existingProfile.setBirthday(request.getBirthday());
+            existingProfile.setHeight(request.getHeight());
+            existingProfile.setWeight(request.getWeight());
+            LOG.info("Updating user profile");
+            userRepository.updateProfile(existingProfile);
+        }
+
+        return getUserProfile();
     }
 
     @Override
     public Response searchMachinesByName(String machineName) {
-        return null;
+        List<VendingMachine> machines = machineRepository.searchByName(machineName);
+        List<MachineSearch> machineSearches = new ArrayList();
+        for (VendingMachine m : machines) {
+            machineSearches.add(new MachineSearch(m.getId(), m.getName(), 0));
+        }
+        return Response.ok(machineSearches).build();
     }
 
     @Override
     public Response getProductDetails(String productId) {
-        return null;
+        Product product = productRepository.getProduct(productId);
+        ProductDTO dto = new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getDescription(),
+                product.getLogoUrl(), ProductType.getProductTypeForClient(product.getType()), product.getNutritionalDataUrl());
+        return Response.ok(dto).build();
     }
 
     @Override
     public Response getAvailablePurchaseForMachine(String productId, String machineId) {
-        return null;
+        //get available products
+        List<Purchase> purchases = purchaseRepository.getAvailablePurchasesForMachine(productId, machineId);
+        LOG.info(String.format("Got a total of %d available purchases", purchases.size()));
+        if (purchases.isEmpty()) {
+            return Response.ok(new AvailablePurchaseResponse(null)).build();
+        } else {
+            //get the first one
+            return Response.ok(new AvailablePurchaseResponse(purchases.get(0).getId())).build();
+        }
     }
 
 
@@ -178,5 +280,10 @@ public class ShopRestServiceImpl implements ShopRestService {
     /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
     private static double rad2deg(double rad) {
         return (rad * 180 / Math.PI);
+    }
+
+    private String createControlNumber(){
+        final String controlNumber = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+        return controlNumber;
     }
 }

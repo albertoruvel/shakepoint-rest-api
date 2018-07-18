@@ -195,9 +195,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     @Transactional
     public void updateProfile(UserProfile existingProfile) {
-        try{
+        try {
             em.merge(existingProfile);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.error("Could not update profile", ex);
         }
     }
@@ -205,20 +205,20 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     @Transactional
     public void saveUserOrder(PartnerProductOrder order) {
-        try{
+        try {
             em.persist(order);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.error("Could not persist requested order", ex);
         }
     }
 
     @Override
     public User findUserByToken(String token) {
-        try{
-            return (User)em.createQuery("SELECT u FROM User u WHERE u.accessToken = :token")
+        try {
+            return (User) em.createQuery("SELECT u FROM User u WHERE u.accessToken = :token")
                     .setParameter("token", token)
                     .getSingleResult();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -230,6 +230,17 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("token", token)
                 .setParameter("id", id)
                 .executeUpdate();
+    }
+
+    @Override
+    public User get(String id) {
+        try{
+            return (User) em.createQuery("SELECT u FROM User u WHERE u.id = :id")
+                    .setParameter("id", id)
+                    .getSingleResult();
+        }catch(Exception ex){
+            return null;
+        }
     }
 
 

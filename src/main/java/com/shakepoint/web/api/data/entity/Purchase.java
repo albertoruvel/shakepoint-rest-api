@@ -39,6 +39,9 @@ public class Purchase {
     @Column(name = "qr_image_url")
     private String qrCodeUrl;
 
+    @Column(name = "control_number")
+    private String controlNumber;
+
     public Purchase() {
         id = UUID.randomUUID().toString();
     }
@@ -113,5 +116,13 @@ public class Purchase {
 
     public void setQrCodeUrl(String qrCodeUrl) {
         this.qrCodeUrl = qrCodeUrl;
+    }
+
+    public String getControlNumber() {
+        return controlNumber;
+    }
+
+    public void setControlNumber(String controlNumber) {
+        this.controlNumber = controlNumber;
     }
 }

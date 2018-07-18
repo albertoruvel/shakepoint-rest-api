@@ -119,6 +119,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         //create a new token
+        final String forgotPasswordToken = ShakeUtils.getNextSessionToken();
+
         return null;
     }
 }

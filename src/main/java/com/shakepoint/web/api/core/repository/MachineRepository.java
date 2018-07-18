@@ -7,9 +7,6 @@ import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 
 import java.util.List;
 
-/**
- * @author Alberto Rubalcaba
- */
 public interface MachineRepository {
     public boolean containProduct(String machineId, String productId);
 

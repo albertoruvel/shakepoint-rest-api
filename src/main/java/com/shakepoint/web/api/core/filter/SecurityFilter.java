@@ -9,8 +9,10 @@ import org.apache.log4j.Logger;
 import org.jboss.resteasy.core.ResourceMethodInvoker;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import javax.annotation.Priority;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.MediaType;
@@ -21,6 +23,7 @@ import java.lang.reflect.Method;
 
 @Secured
 @Provider
+@Priority(Priorities.AUTHORIZATION)
 public class SecurityFilter implements ContainerRequestFilter {
 
     private final Logger log = Logger.getLogger(getClass());
