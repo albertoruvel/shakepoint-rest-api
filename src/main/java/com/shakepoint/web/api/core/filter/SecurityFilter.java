@@ -2,16 +2,14 @@ package com.shakepoint.web.api.core.filter;
 
 import com.github.roar109.syring.annotation.ApplicationProperty;
 import com.shakepoint.web.api.core.repository.UserRepository;
-import com.shakepoint.web.api.core.service.security.AllowedUsers;
-import com.shakepoint.web.api.core.service.security.RequestPrincipal;
-import com.shakepoint.web.api.core.service.security.Secured;
-import com.shakepoint.web.api.core.service.security.SecurityRole;
+import com.shakepoint.web.api.core.service.security.*;
 import com.shakepoint.web.api.data.dto.response.AuthenticationResponse;
 import com.shakepoint.web.api.data.entity.User;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.core.ResourceMethodInvoker;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -34,6 +32,10 @@ public class SecurityFilter implements ContainerRequestFilter {
     @ApplicationProperty(name = "com.shakepoint.web.admin.token", type = ApplicationProperty.Types.SYSTEM)
     private String adminToken;
 
+    @Inject
+    @AuthenticatedUser
+    private Event<String> userAuthenticatedEvent;
+
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {
         //authenticate user here...
         ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) containerRequestContext
@@ -45,6 +47,7 @@ public class SecurityFilter implements ContainerRequestFilter {
         //check if the incoming request is from the admin token
         if(auth != null && auth.equals(adminToken)){
             //let it pass..
+            userAuthenticatedEvent.fire("admin");
             return;
         }
         //first check if the class checks if is annotated with @AllowedUsers
@@ -77,10 +80,8 @@ public class SecurityFilter implements ContainerRequestFilter {
             if (user != null) {
                 for (SecurityRole role : roles) {
                     if (SecurityRole.fromString(user.getRole()) == role) {
-                        //the user has role and has been authenticated successfully
-                        //push security context
-                        ResteasyProviderFactory.pushContext(RequestPrincipal.class,
-                                new RequestPrincipal(user.getId()));
+                        //user authenticated
+                        userAuthenticatedEvent.fire(user.getId());
                         return true;
                     }
                 }

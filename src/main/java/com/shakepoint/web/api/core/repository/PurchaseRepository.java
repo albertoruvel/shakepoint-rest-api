@@ -14,8 +14,8 @@ public interface PurchaseRepository {
 	public Map<String, List<Double>> getPerMachineProductsCountValues(String[] range, List<VendingMachine> machines);
 	public List<Double> getTotalIncomeValues(String[] range);
 	public List<Double> getTotalIncomeValues(String[] range, String machineId);
-	public List<Purchase> getAuthorizedPurchases(String userId, String machineId, int pageNumber);
-	public List<Purchase> getUserPurchases(String userId, int pageNumber);
+	public List<Purchase> getAuthorizedPurchases(String userId, String machineId);
+	public List<Purchase> getUserPurchases(String userId);
 	public void update(Purchase purchase);
 	public List<Purchase> getAvailablePurchasesForMachine(String productId, String machineId);
 

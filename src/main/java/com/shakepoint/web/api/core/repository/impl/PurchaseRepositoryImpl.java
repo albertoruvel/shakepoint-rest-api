@@ -39,7 +39,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
     }
 
     @Override
-    public List<Purchase> getUserPurchases(String userId, int pageNumber) {
+    public List<Purchase> getUserPurchases(String userId) {
         try {
             return em.createQuery("SELECT p FROM Purchase p WHERE p.user.id = :id")
                     .setParameter("id", userId).getResultList();
@@ -202,7 +202,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
     }
 
     @Override
-    public List<Purchase> getAuthorizedPurchases(String userId, String machineId, int pageNumber) {
+    public List<Purchase> getAuthorizedPurchases(String userId, String machineId) {
         try {
             return em.createQuery("SELECT p FROM Purchase p WHERE p.user.id = :id AND p.machine.id = :machineId AND p.status = :status")
                     .setParameter("id", userId)
