@@ -5,6 +5,7 @@ import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
 import com.shakepoint.web.api.data.entity.User;
+import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
 import org.apache.log4j.Logger;
 
@@ -237,6 +238,38 @@ public class UserRepositoryImpl implements UserRepository {
         try{
             return (User) em.createQuery("SELECT u FROM User u WHERE u.id = :id")
                     .setParameter("id", id)
+                    .getSingleResult();
+        }catch(Exception ex){
+            return null;
+        }
+    }
+
+    @Override
+    public UserPassword getUserPassword(String userId) {
+        try{
+            return (UserPassword) em.createQuery("SELECT u FROM UserPassword WHERE u.userId = :userId")
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+        }catch(Exception ex) {
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateUserPassword(UserPassword userPassword) {
+        try{
+            em.merge(userPassword);
+        }catch(Exception ex){
+            log.error("Could not add user password", ex);
+        }
+    }
+
+    @Override
+    public UserPassword getUserPasswordByToken(String token) {
+        try{
+            return (UserPassword) em.createQuery("SELECT u FROM UserPassword u WHERE u.token = :token")
+                    .setParameter("token", token)
                     .getSingleResult();
         }catch(Exception ex){
             return null;

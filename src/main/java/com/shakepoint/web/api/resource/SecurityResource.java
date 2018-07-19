@@ -1,6 +1,6 @@
 package com.shakepoint.web.api.resource;
 
-import com.shakepoint.web.api.core.service.security.AuthenticationService;
+import com.shakepoint.web.api.core.service.security.SecurityService;
 import com.shakepoint.web.api.data.dto.request.SignInRequest;
 import com.shakepoint.web.api.data.dto.request.SignupRequest;
 
@@ -13,28 +13,45 @@ import javax.ws.rs.core.Response;
 public class SecurityResource {
 
     @Inject
-    private AuthenticationService authenticationService;
+    private SecurityService securityService;
 
     @Path("signIn")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response signIn(SignInRequest request){
-        return authenticationService.authenticate(request);
+    public Response signIn(SignInRequest request) {
+        return securityService.authenticate(request);
     }
 
     @POST
     @Path("signUp")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response signUp(SignupRequest request){
-        return authenticationService.signUp(request);
+    public Response signUp(SignupRequest request) {
+        return securityService.signUp(request);
     }
 
     @POST
     @Path("forgotPassword")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response forgotPassword(@QueryParam("email")String email) {
-        return authenticationService.forgotPassword(email);
+    public Response forgotPassword(@QueryParam("email") String email) {
+        return securityService.forgotPassword(email);
+    }
+
+    @POST
+    @Path("resetPassword")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response resetPassword() {
+        // TODO: !!!!
+        return null;
+    }
+
+    @POST
+    @Path("validateForgotPasswordToken")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response validateForgotPasswordToken(@QueryParam("token") String token) throws Exception {
+        return securityService.validateForgotPasswordToken(token);
     }
 }

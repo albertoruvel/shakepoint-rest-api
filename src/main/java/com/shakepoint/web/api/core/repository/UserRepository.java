@@ -7,6 +7,7 @@ package com.shakepoint.web.api.core.repository;
 
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
 import com.shakepoint.web.api.data.entity.User;
+import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
 
 import java.util.List;
@@ -35,4 +36,9 @@ public interface UserRepository {
 
     public void saveUserToken(String id, String token);
     public User get(String id);
+    public UserPassword getUserPassword(String userId);
+
+    public void updateUserPassword(UserPassword userPassword);
+
+    public UserPassword getUserPasswordByToken(String token);
 }

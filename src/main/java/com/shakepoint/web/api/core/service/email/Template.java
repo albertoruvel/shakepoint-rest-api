@@ -4,7 +4,8 @@ public enum Template {
     SIGN_UP("successfully-signup","Registro en Shakepoint"),
     SUCCESSFUL_PURCHASE("success-purchase","Su compra ha sido procesada correctamente"),
     NEW_PARTNER_ORDER_REQUEST_CLIENT("new_partner_order", "Petición Shakepoint"),
-    NEW_PARTNER_ORDER_REQUEST_ADMIN("new_partner_order_admin", "Solicitud Shakepoint");;
+    FORGOT_PASSWORD_REQUEST("forgot_password_request", "Reestablecer contraseña"),
+    NEW_PARTNER_ORDER_REQUEST_ADMIN("new_partner_order_admin", "Solicitud Shakepoint");
 
     Template(final String templateName, final String subject ){
         this.templateName = templateName;
