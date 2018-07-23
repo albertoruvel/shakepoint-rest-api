@@ -9,6 +9,7 @@ import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
 import org.apache.log4j.Logger;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -23,6 +24,7 @@ import java.util.List;
  *
  * @author Alberto Rubalcaba
  */
+@Stateless
 public class UserRepositoryImpl implements UserRepository {
 
     @PersistenceContext

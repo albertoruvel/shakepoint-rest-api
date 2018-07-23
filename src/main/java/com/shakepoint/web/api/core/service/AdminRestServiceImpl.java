@@ -5,16 +5,18 @@ import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import com.shakepoint.web.api.core.exception.MandatoryFieldException;
 import com.shakepoint.web.api.core.machine.MachineMessageCode;
 import com.shakepoint.web.api.core.machine.ProductType;
-import com.shakepoint.web.api.core.repository.MachineRepository;
-import com.shakepoint.web.api.core.repository.ProductRepository;
-import com.shakepoint.web.api.core.repository.PurchaseRepository;
-import com.shakepoint.web.api.core.repository.UserRepository;
+import com.shakepoint.web.api.core.repository.*;
+import com.shakepoint.web.api.core.service.email.EmailAsyncSender;
+import com.shakepoint.web.api.core.service.email.Template;
+import com.shakepoint.web.api.core.service.promo.PromoCodeManager;
 import com.shakepoint.web.api.core.service.security.CryptoService;
+import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.shop.PayWorksClientService;
 import com.shakepoint.web.api.core.shop.PayWorksMode;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.core.util.ValidationUtils;
+import com.shakepoint.web.api.data.dto.request.admin.CreateOpenPromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
@@ -62,6 +64,15 @@ public class AdminRestServiceImpl implements AdminRestService {
 
     @Inject
     private JmsHandler jmsHandler;
+
+    @Inject
+    private PromoCodeManager promoCodeManager;
+
+    @Inject
+    private PromoCodeRepository promoCodeRepository;
+
+    @Inject
+    private EmailAsyncSender emailSender;
 
     private static final String MACHINE_CONNECTION_QUEUE_NAME = "machine_connection";
     private static final String DELETE_MEDIA_CONTENT_QUEUE_NAME = "delete_media_content";
@@ -239,7 +250,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         // add the new entity
         machineRepository.addMachineProduct(newMachineProduct);
 
-        return Response.ok().build();
+        return Response.ok(new VendingProductResponse(newMachineProduct.getId())).build();
     }
 
     @Override
@@ -348,6 +359,48 @@ public class AdminRestServiceImpl implements AdminRestService {
         final PayWorksMode currentMode = PayWorksMode.get(mode);
         payWorksClientService.savePayWorksMode(currentMode);
         return Response.ok().build();
+    }
+
+    @Override
+    public Response createOpenPromoCode(CreateOpenPromoCodeRequest request) {
+        //validate
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreateOpenPromoCodeResponse("Promo code have been created")).build();
+        } else if (request.getDescription() == null || request.getDescription().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreateOpenPromoCodeResponse("Promo code description is required")).build();
+        } else if (request.getDiscount() <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreateOpenPromoCodeResponse("Promo code discount must be different to 0")).build();
+        } else if (request.getExpirationDate() == null || request.getExpirationDate().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreateOpenPromoCodeResponse("Promo code expiration date is required")).build();
+        }
+        //create a new promo code
+        PromoCode promoCode = promoCodeManager.createOpenPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount());
+        //save it
+        promoCodeRepository.createPromoCode(promoCode);
+
+        //get all users with member and trainer roles
+        List<User> users = userRepository.getUsers();
+        //create email params
+        Map<String, Object> emailParams = new HashMap<String, Object>();
+        emailParams.put("promoCode", promoCode.getCode());
+
+        users.stream()
+                .forEach(user -> {
+                    if (user.getRole().equals(SecurityRole.MEMBER.getValue())
+                        || user.getRole().equals(SecurityRole.TRAINER.getValue())){
+                        //send email
+                        emailParams.put("username", user.getName());
+                        emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
+                    }
+                });
+
+        //TODO; send push notification later here....
+
+        return Response.ok(new CreateOpenPromoCodeResponse("Promo code have been created")).build();
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {

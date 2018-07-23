@@ -1,7 +1,7 @@
 package com.shakepoint.web.api.core.service.security;
 
 public enum SecurityRole {
-    ADMIN("ADMIN"), MEMBER("MEMBER"), PARTNER("PARTNER"), ALL("ALL");
+    ADMIN("ADMIN"), MEMBER("MEMBER"), PARTNER("PARTNER"), TRAINER("TRAINER"), ALL("ALL");
 
     String value;
 
@@ -12,14 +12,17 @@ public enum SecurityRole {
     public String getValue() {
         return this.value;
     }
-    public static SecurityRole fromString(String v){
-        if (v.equals(ADMIN.value)){
+
+    public static SecurityRole fromString(String v) {
+        if (v.equals(ADMIN.value)) {
             return ADMIN;
-        }else if(v.equals(MEMBER.value)){
+        } else if (v.equals(MEMBER.value)) {
             return MEMBER;
-        } else if (v.equals(PARTNER.value)){
+        } else if (v.equals(PARTNER.value)) {
             return PARTNER;
-        }else {
+        } else if (v.equals(TRAINER.value)) {
+            return TRAINER;
+        } else {
             return ALL;
         }
     }

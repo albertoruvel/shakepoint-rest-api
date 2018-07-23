@@ -12,6 +12,7 @@ import com.shakepoint.web.api.data.entity.VendingMachine;
 import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 import org.apache.log4j.Logger;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,6 +24,7 @@ import java.util.List;
 /**
  * @author Alberto Rubalcaba
  */
+@Stateless
 public class MachineRepositoryImpl implements MachineRepository {
 
     private final Logger log = Logger.getLogger(getClass());
@@ -139,6 +141,7 @@ public class MachineRepositoryImpl implements MachineRepository {
     private static final String DELETE_MACHINE_PRODUCT = "delete from machine_product where id = ?";
 
     @Override
+    @Transactional
     public void deleteMachineProduct(String id) {
         //delete
         try {

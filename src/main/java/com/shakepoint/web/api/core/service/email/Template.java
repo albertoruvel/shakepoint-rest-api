@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.core.service.email;
 
 public enum Template {
+    OPEN_PROMO_CODE_CREATED("open-promo-code-created", "Código de descuento!"),
     SIGN_UP("successfully-signup","Registro en Shakepoint"),
     SUCCESSFUL_PURCHASE("success-purchase","Su compra ha sido procesada correctamente"),
     NEW_PARTNER_ORDER_REQUEST_CLIENT("new_partner_order", "Petición Shakepoint"),

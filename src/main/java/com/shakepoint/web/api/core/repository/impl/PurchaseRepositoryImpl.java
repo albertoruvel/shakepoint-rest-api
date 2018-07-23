@@ -8,12 +8,14 @@ import com.shakepoint.web.api.data.entity.Purchase;
 import com.shakepoint.web.api.data.entity.VendingMachine;
 import org.apache.log4j.Logger;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.util.*;
 
+@Stateless
 public class PurchaseRepositoryImpl implements PurchaseRepository {
 
     @Inject

@@ -1,5 +1,6 @@
 package com.shakepoint.web.api.core.service;
 
+import com.shakepoint.web.api.data.dto.request.admin.CreateOpenPromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
@@ -46,4 +47,6 @@ public interface AdminRestService {
     public Response deleteMediaContent();
 
     public Response writePayWorksMode(String mode);
+
+    public Response createOpenPromoCode(CreateOpenPromoCodeRequest request);
 }

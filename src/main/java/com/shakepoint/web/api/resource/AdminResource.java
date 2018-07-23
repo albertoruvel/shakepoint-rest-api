@@ -4,6 +4,7 @@ import com.shakepoint.web.api.core.service.AdminRestService;
 import com.shakepoint.web.api.core.service.security.AllowedUsers;
 import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
+import com.shakepoint.web.api.data.dto.request.admin.CreateOpenPromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
@@ -99,7 +100,7 @@ public class AdminResource {
         return adminRestService.addMachineProduct(machineId, productId, slotNumber);
     }
 
-    @DELETE
+    @POST
     @Path("deleteVendingProduct")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteMachineProduct(@QueryParam("vendingProductId") String id) {
@@ -116,48 +117,56 @@ public class AdminResource {
     @Path("getPartnerMachinesContent")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTechnicianMachinesContent(@QueryParam("machineId")String technicianId){
+    public Response getTechnicianMachinesContent(@QueryParam("machineId") String technicianId) {
         return adminRestService.getTechnicianMachinesContent(technicianId);
     }
 
     @GET
     @Path("getUsers")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getShakepointUsers(){
+    public Response getShakepointUsers() {
         return adminRestService.getShakepointUsers();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getIndexContent")
-    public Response getIndexContent(){
+    public Response getIndexContent() {
         return adminRestService.getIndexContent();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getPerVendingContent")
-    public Response getIndexPerMachineValues(@QueryParam("machineId")String from, @QueryParam("machineId")String to){
+    public Response getIndexPerMachineValues(@QueryParam("machineId") String from, @QueryParam("machineId") String to) {
         return adminRestService.getIndexPerMachineValues(from, to);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getTotalIncomeValues")
-    public Response getTotalIncomeValues(@QueryParam("machineId")String from, @QueryParam("machineId")String to){
+    public Response getTotalIncomeValues(@QueryParam("machineId") String from, @QueryParam("machineId") String to) {
         return adminRestService.getTotalIncomeValues(from, to);
     }
 
     @DELETE
     @Path("deleteMediaContent")
-    public Response deleteMediaContent(){
+    public Response deleteMediaContent() {
         return adminRestService.deleteMediaContent();
     }
 
     @POST
     @Path("writePayWorksPayMode")
-    public Response writePayWorksMode(@QueryParam("machineId")String mode){
+    public Response writePayWorksMode(@QueryParam("machineId") String mode) {
         return adminRestService.writePayWorksMode(mode);
+    }
+
+    @POST
+    @Path("createOpenPromoCode")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createOpenPromoCode(CreateOpenPromoCodeRequest request) {
+        return adminRestService.createOpenPromoCode(request);
     }
 }
 
