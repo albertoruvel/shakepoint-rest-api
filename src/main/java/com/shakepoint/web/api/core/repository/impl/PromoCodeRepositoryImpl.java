@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @Stateless
 public class PromoCodeRepositoryImpl implements PromoCodeRepository {
@@ -22,6 +23,23 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
             em.persist(promoCode);
         }catch(Exception ex){
             logger.error("Could not persist promo code");
+        }
+    }
+
+    @Override
+    public List<PromoCode> getAllPromoCodes() {
+        return em.createQuery("SELECT p FROM Promo p")
+                .getResultList();
+    }
+
+    @Override
+    public PromoCode findPromoCodeByCode(String code) {
+        try{
+            return (PromoCode)em.createQuery("SELECT p FROM Promo p WHERE p.code = :code")
+                    .setParameter("code", code)
+                    .getSingleResult();
+        }catch(Exception ex){
+            return null;
         }
     }
 }

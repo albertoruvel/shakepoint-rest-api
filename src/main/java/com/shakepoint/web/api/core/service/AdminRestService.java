@@ -1,8 +1,7 @@
 package com.shakepoint.web.api.core.service;
 
-import com.shakepoint.web.api.data.dto.request.admin.CreateOpenPromoCodeRequest;
+import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
-import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
@@ -48,5 +47,11 @@ public interface AdminRestService {
 
     public Response writePayWorksMode(String mode);
 
-    public Response createOpenPromoCode(CreateOpenPromoCodeRequest request);
+    public Response createOpenPromoCode(CreatePromoCodeRequest request);
+
+    public Response getActivePromos();
+
+    public Response createTrainersPromoCode(CreatePromoCodeRequest request);
+
+    public void createBirthDatePromoCode(String userId);
 }

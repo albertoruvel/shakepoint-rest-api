@@ -4,9 +4,8 @@ import com.shakepoint.web.api.core.service.AdminRestService;
 import com.shakepoint.web.api.core.service.security.AllowedUsers;
 import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
-import com.shakepoint.web.api.data.dto.request.admin.CreateOpenPromoCodeRequest;
+import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
-import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
@@ -162,11 +161,26 @@ public class AdminResource {
     }
 
     @POST
-    @Path("createOpenPromoCode")
+    @Path("createPromoCode")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createOpenPromoCode(CreateOpenPromoCodeRequest request) {
+    public Response createOpenPromoCode(CreatePromoCodeRequest request) {
         return adminRestService.createOpenPromoCode(request);
+    }
+
+    @POST
+    @Path("createTrainersPromoCode")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createTrainersPromoCode(CreatePromoCodeRequest request) {
+        return adminRestService.createTrainersPromoCode(request);
+    }
+
+    @GET
+    @Path("getActivePromos")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getActivePromos() {
+        return adminRestService.getActivePromos();
     }
 }
 

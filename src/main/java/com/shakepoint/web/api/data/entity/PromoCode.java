@@ -16,12 +16,16 @@ public class PromoCode {
     @Column(name = "promo_code")
     private String code;
 
-    @Column(name = "type")
+    @Column(name = "promo_type")
     @Enumerated(value = EnumType.ORDINAL)
     private PromoType type;
 
     @Column(name = "discount")
     private int discount;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     @Column(name = "expiration_date")
     private String expirationDate;
@@ -76,5 +80,13 @@ public class PromoCode {
 
     public void setExpirationDate(String expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }

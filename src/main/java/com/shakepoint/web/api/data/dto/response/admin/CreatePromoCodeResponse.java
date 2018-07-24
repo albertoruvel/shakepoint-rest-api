@@ -1,9 +1,9 @@
 package com.shakepoint.web.api.data.dto.response.admin;
 
-public class CreateOpenPromoCodeResponse {
+public class CreatePromoCodeResponse {
     private String message;
 
-    public CreateOpenPromoCodeResponse(String message) {
+    public CreatePromoCodeResponse(String message) {
         this.message = message;
     }
 

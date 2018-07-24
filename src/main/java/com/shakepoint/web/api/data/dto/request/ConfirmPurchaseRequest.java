@@ -5,6 +5,7 @@ public class ConfirmPurchaseRequest {
     private String cardNumber;
     private String cardExpirationDate;
     private String cvv;
+    private String promoCode;
 
 
     public ConfirmPurchaseRequest() {
@@ -41,5 +42,13 @@ public class ConfirmPurchaseRequest {
 
     public void setCvv(String cvv) {
         this.cvv = cvv;
+    }
+
+    public String getPromoCode() {
+        return promoCode;
+    }
+
+    public void setPromoCode(String promoCode) {
+        this.promoCode = promoCode;
     }
 }

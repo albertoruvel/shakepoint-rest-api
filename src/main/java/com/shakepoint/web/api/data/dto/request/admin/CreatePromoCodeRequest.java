@@ -1,9 +1,10 @@
 package com.shakepoint.web.api.data.dto.request.admin;
 
-public class CreateOpenPromoCodeRequest {
+public class CreatePromoCodeRequest {
     private String description;
     private String expirationDate;
     private int discount;
+    private String productId;
 
     public String getDescription() {
         return description;
@@ -27,5 +28,13 @@ public class CreateOpenPromoCodeRequest {
 
     public void setDiscount(int discount) {
         this.discount = discount;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
     }
 }

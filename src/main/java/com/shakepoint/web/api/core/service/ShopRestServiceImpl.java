@@ -3,12 +3,10 @@ package com.shakepoint.web.api.core.service;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.machine.PurchaseStatus;
-import com.shakepoint.web.api.core.repository.MachineRepository;
-import com.shakepoint.web.api.core.repository.ProductRepository;
-import com.shakepoint.web.api.core.repository.PurchaseRepository;
-import com.shakepoint.web.api.core.repository.UserRepository;
+import com.shakepoint.web.api.core.repository.*;
 import com.shakepoint.web.api.core.service.email.EmailAsyncSender;
 import com.shakepoint.web.api.core.service.email.Template;
+import com.shakepoint.web.api.core.service.promo.PromoCodeManager;
 import com.shakepoint.web.api.core.service.security.AuthenticatedUser;
 import com.shakepoint.web.api.core.service.security.RequestPrincipal;
 import com.shakepoint.web.api.core.shop.PayWorksClientService;
@@ -46,6 +44,12 @@ public class ShopRestServiceImpl implements ShopRestService {
 
     @Inject
     private PayWorksClientService payWorksClientService;
+
+    @Inject
+    private PromoCodeRepository promoCodeRepository;
+
+    @Inject
+    private PromoCodeManager promoCodeManager;
 
     @Inject
     @AuthenticatedUser
@@ -123,6 +127,25 @@ public class ShopRestServiceImpl implements ShopRestService {
                     .entity(new PurchaseQRCode(null, false, "La compra especificada ya ha sido comprada por alguien mas, refresca los productos y vuelve a intentar"))
                     .build();
         } else {
+            //get promo code if exists
+            if (request.getPromoCode() != null && !request.getPromoCode().isEmpty()) {
+                //get it
+                PromoCode promoCode = promoCodeRepository.findPromoCodeByCode(request.getPromoCode());
+                if (promoCode == null) {
+                    //promo code is invalid
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new PurchaseQRCode(null, false, "El código de promoción es inválido")).build();
+                } else {
+                    //check expiration date for promo code
+                    if (promoCodeManager.isPromoCodeExpired(promoCode)){
+                        //expired
+                        return Response.status(Response.Status.BAD_REQUEST)
+                                .entity(new PurchaseQRCode(null, false, "El código de promoción ha expirado")).build();
+                    } else {
+                        //TODO: link promo code to purchase and save all data from promo code redemption
+                    }
+                }
+            }
             user = userRepository.get(authenticatedUser.getId());
             final String controlNumber = createControlNumber();
             purchase.setControlNumber(controlNumber);
@@ -282,7 +305,7 @@ public class ShopRestServiceImpl implements ShopRestService {
         return (rad * 180 / Math.PI);
     }
 
-    private String createControlNumber(){
+    private String createControlNumber() {
         final String controlNumber = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
         return controlNumber;
     }

@@ -264,4 +264,10 @@ public class TransformationUtils {
             return null;
         }
     }
+
+    public static Promotion createPromoCode(PromoCode promo, Product product) {
+        Promotion promotion = new Promotion(promo.getId(), promo.getExpirationDate(), createSimpleProduct(product), promo.getDiscount(),
+                promo.getType().toString(), promo.getCode());
+        return promotion;
+    }
 }

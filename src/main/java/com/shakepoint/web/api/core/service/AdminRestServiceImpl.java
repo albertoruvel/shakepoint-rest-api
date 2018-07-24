@@ -3,7 +3,6 @@ package com.shakepoint.web.api.core.service;
 import com.github.roar109.syring.annotation.ApplicationProperty;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import com.shakepoint.web.api.core.exception.MandatoryFieldException;
-import com.shakepoint.web.api.core.machine.MachineMessageCode;
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.repository.*;
 import com.shakepoint.web.api.core.service.email.EmailAsyncSender;
@@ -16,7 +15,7 @@ import com.shakepoint.web.api.core.shop.PayWorksMode;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.core.util.ValidationUtils;
-import com.shakepoint.web.api.data.dto.request.admin.CreateOpenPromoCodeRequest;
+import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
@@ -362,23 +361,30 @@ public class AdminRestServiceImpl implements AdminRestService {
     }
 
     @Override
-    public Response createOpenPromoCode(CreateOpenPromoCodeRequest request) {
+    public Response createOpenPromoCode(CreatePromoCodeRequest request) {
         //validate
         if (request == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new CreateOpenPromoCodeResponse("Promo code have been created")).build();
+                    .entity(new CreatePromoCodeResponse("Promo code have been created")).build();
         } else if (request.getDescription() == null || request.getDescription().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new CreateOpenPromoCodeResponse("Promo code description is required")).build();
+                    .entity(new CreatePromoCodeResponse("Promo code description is required")).build();
         } else if (request.getDiscount() <= 0) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new CreateOpenPromoCodeResponse("Promo code discount must be different to 0")).build();
+                    .entity(new CreatePromoCodeResponse("Promo code discount must be different to 0")).build();
         } else if (request.getExpirationDate() == null || request.getExpirationDate().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new CreateOpenPromoCodeResponse("Promo code expiration date is required")).build();
+                    .entity(new CreatePromoCodeResponse("Promo code expiration date is required")).build();
         }
+
         //create a new promo code
-        PromoCode promoCode = promoCodeManager.createOpenPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount());
+        PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.OPEN);
+        Product product;
+        //check if any product id
+        if (request.getProductId() != null && ! request.getProductId().isEmpty()) {
+            product = productRepository.getProduct(request.getProductId());
+            promoCode.setProduct(product);
+        }
         //save it
         promoCodeRepository.createPromoCode(promoCode);
 
@@ -399,8 +405,87 @@ public class AdminRestServiceImpl implements AdminRestService {
                 });
 
         //TODO; send push notification later here....
+        return Response.ok(new CreatePromoCodeResponse("Promo code have been created")).build();
+    }
 
-        return Response.ok(new CreateOpenPromoCodeResponse("Promo code have been created")).build();
+    @Override
+    public Response getActivePromos() {
+        //get all promos
+        List<PromoCode> promoCodes = promoCodeRepository.getAllPromoCodes();
+        List<Promotion> promos = new ArrayList<Promotion>();
+        try{
+            promoCodes.stream().forEach(promo -> {
+                //check expiration
+                if (! promoCodeManager.isPromoCodeExpired(promo)) {
+                    Product product = productRepository.getProduct(promo.getProduct().getId());
+                    promos.add(TransformationUtils.createPromoCode(promo, product));
+                }
+            });
+            return Response.ok(promos).build();
+        }catch (Exception ex){
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
+
+    @Override
+    public Response createTrainersPromoCode(CreatePromoCodeRequest request) {
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreatePromoCodeResponse("Promo code have been created")).build();
+        } else if (request.getDescription() == null || request.getDescription().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreatePromoCodeResponse("Promo code description is required")).build();
+        } else if (request.getDiscount() <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreatePromoCodeResponse("Promo code discount must be different to 0")).build();
+        } else if (request.getExpirationDate() == null || request.getExpirationDate().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CreatePromoCodeResponse("Promo code expiration date is required")).build();
+        }
+
+        PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.TRAINER);
+        if (request.getProductId() != null && ! request.getProductId().isEmpty()) {
+            Product product = productRepository.getProduct(request.getProductId());
+            promoCode.setProduct(product);
+        }
+        //persist promo code
+        promoCodeRepository.createPromoCode(promoCode);
+        //send email to all trainers
+        List<User> users = userRepository.getUsers();
+        Map<String, Object> emailParams = new HashMap<>();
+        emailParams.put("promocode", promoCode.getCode());
+        users.stream().forEach(user -> {
+            if (user.getRole().equals(SecurityRole.TRAINER.getValue())) {
+                //send email with promo code
+                emailParams.put("username", user.getName());
+                emailSender.sendEmail(user.getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+            }
+        });
+
+        return Response.ok(new CreatePromoCodeResponse("Promo code have been created")).build();
+    }
+
+    @Override
+    public void createBirthDatePromoCode(String userId) {
+        //get user
+        User user = userRepository.get(userId);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MONTH, 1);
+
+        //create promo code
+        PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
+                "Mes del cumpleañero!", 100, PromoType.BIRTHDATE);
+        //this promo code includes any free drink
+        promoCodeRepository.createPromoCode(promoCode);
+
+        Map<String, Object> emailParams = new HashMap<>();
+        emailParams.put("promocode", promoCode.getCode());
+        emailParams.put("username", user.getName());
+        //send email
+        emailSender.sendEmail(user.getEmail(), Template.USER_BIRTHDATE_PROMO_CODE, emailParams);
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {
