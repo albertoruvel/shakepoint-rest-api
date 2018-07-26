@@ -18,4 +18,5 @@ public interface PromoCodeRepository {
     public boolean isPromoCodeAlreadyRedeemedByUser(String code, String id);
 
 
+    public Integer getPromoCodeRedemptions(String code);
 }

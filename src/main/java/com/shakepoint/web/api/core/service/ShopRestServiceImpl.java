@@ -230,11 +230,17 @@ public class ShopRestServiceImpl implements ShopRestService {
                 //send email
                 emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
 
-                //get trainer if this promo code is assigned to a trainer
-                //Integer trainerPromoCodesUsed
-
-                //check number of times a trainer promo code have been used
-                //Integer promoCodesUsed = promoCodeRepository.getRedeemedPromoCodesByTriner();
+                //check if promo code contains a trainer assigned
+                User trainer = promoCode.getTrainer();
+                if (trainer != null) {
+                    //check number of redeems for promo code
+                    Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
+                    if (redemptionsCount % 10 == 0) {
+                        //deserves 10% off on next drink
+                        //TODO: creates a new promo code
+                        PromoCode trainerPromoCode = promoCodeManager.createPromoCode()
+                    }
+                }
 
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
             } else {

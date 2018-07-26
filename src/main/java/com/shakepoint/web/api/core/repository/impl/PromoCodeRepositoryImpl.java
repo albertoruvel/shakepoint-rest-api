@@ -66,4 +66,10 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
         }
     }
 
+    @Override
+    public Integer getPromoCodeRedemptions(String code) {
+        return (Integer) em.createQuery("SELECT COUNT(r.id) FROM PromoRedeem PromoRedeem r WHERE r.code = :code")
+                .setParameter("code", code).getSingleResult();
+    }
+
 }
