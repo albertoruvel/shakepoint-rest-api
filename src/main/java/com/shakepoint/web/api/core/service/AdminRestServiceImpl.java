@@ -98,7 +98,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         NewProductRequest product = TransformationUtils.createProductRequestFromMultipart(multipart);
         if (product != null) {
             //validate product
-            try{
+            try {
                 ValidationUtils.validateProduct(product);
                 Product productEntity = new Product();
                 productEntity.setType(ProductType.getProductType(product.getProductType()));
@@ -108,7 +108,7 @@ public class AdminRestServiceImpl implements AdminRestService {
                 jmsHandler.send(NUTRITIONAL_DATA_QUEUE_NAME, productEntity.getId());
                 //return success
                 return Response.ok().build();
-            }catch(MandatoryFieldException ex){
+            } catch (MandatoryFieldException ex) {
                 //return validation error
                 log.error("Could not create product due to mandatory field is missing", ex);
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -381,7 +381,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.OPEN);
         Product product;
         //check if any product id
-        if (request.getProductId() != null && ! request.getProductId().isEmpty()) {
+        if (request.getProductId() != null && !request.getProductId().isEmpty()) {
             product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
         }
@@ -397,7 +397,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         users.stream()
                 .forEach(user -> {
                     if (user.getRole().equals(SecurityRole.MEMBER.getValue())
-                        || user.getRole().equals(SecurityRole.TRAINER.getValue())){
+                            || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
                         //send email
                         emailParams.put("username", user.getName());
                         emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
@@ -413,16 +413,16 @@ public class AdminRestServiceImpl implements AdminRestService {
         //get all promos
         List<PromoCode> promoCodes = promoCodeRepository.getAllPromoCodes();
         List<Promotion> promos = new ArrayList<Promotion>();
-        try{
+        try {
             promoCodes.stream().forEach(promo -> {
                 //check expiration
-                if (! promoCodeManager.isPromoCodeExpired(promo)) {
+                if (!promoCodeManager.isPromoCodeExpired(promo)) {
                     Product product = productRepository.getProduct(promo.getProduct().getId());
                     promos.add(TransformationUtils.createPromoCode(promo, product));
                 }
             });
             return Response.ok(promos).build();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
@@ -445,9 +445,14 @@ public class AdminRestServiceImpl implements AdminRestService {
         }
 
         PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.TRAINER);
-        if (request.getProductId() != null && ! request.getProductId().isEmpty()) {
+        if (request.getProductId() != null && !request.getProductId().isEmpty()) {
             Product product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
+        }
+        if (request.getTrainerId() != null && !request.getTrainerId().isEmpty()) {
+            //fetch trainer and set it
+            User trainer = userRepository.get(request.getTrainerId());
+            promoCode.setTrainer(trainer);
         }
         //persist promo code
         promoCodeRepository.createPromoCode(promoCode);

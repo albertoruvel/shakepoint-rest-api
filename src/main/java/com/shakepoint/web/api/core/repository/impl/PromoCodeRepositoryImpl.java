@@ -3,6 +3,7 @@ package com.shakepoint.web.api.core.repository.impl;
 import com.shakepoint.web.api.core.repository.PromoCodeRepository;
 import com.shakepoint.web.api.data.entity.PromoCode;
 import com.shakepoint.web.api.data.entity.PromoCodeRedeem;
+import com.shakepoint.web.api.data.entity.User;
 import org.apache.log4j.Logger;
 
 import javax.ejb.Stateless;
@@ -64,4 +65,5 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
             return false;
         }
     }
+
 }

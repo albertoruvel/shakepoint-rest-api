@@ -30,6 +30,10 @@ public class PromoCode {
     @Column(name = "expiration_date")
     private String expirationDate;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "trainer_id")
+    private User trainer;
+
     public PromoCode() {
         this.id = UUID.randomUUID().toString();
     }
@@ -88,5 +92,13 @@ public class PromoCode {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public User getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(User trainer) {
+        this.trainer = trainer;
     }
 }

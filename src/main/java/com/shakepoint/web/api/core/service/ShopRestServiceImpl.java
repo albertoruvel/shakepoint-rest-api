@@ -9,7 +9,9 @@ import com.shakepoint.web.api.core.service.email.Template;
 import com.shakepoint.web.api.core.service.promo.PromoCodeManager;
 import com.shakepoint.web.api.core.service.security.AuthenticatedUser;
 import com.shakepoint.web.api.core.service.security.RequestPrincipal;
+import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.shop.PayWorksClientService;
+import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
@@ -179,7 +181,7 @@ public class ShopRestServiceImpl implements ShopRestService {
         PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber(),
                 request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
         if (paymentDetails == null) {
-            LOG.info("No payment details from payworks");
+            LOG.info("No payment details from pay works");
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new PurchaseQRCode(null, false, "Ha ocurrido un problema al realizar el pago, intenta nuevamente"))
                     .build();
@@ -195,6 +197,25 @@ public class ShopRestServiceImpl implements ShopRestService {
             purchase.setReference(paymentDetails.getReference());
             purchaseRepository.update(purchase);
 
+            if (user.getRole().equals(SecurityRole.MEMBER.getValue())) {
+                //check how many purchases member has
+                Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
+                if (purchasesCount != 0 && purchasesCount % 10 == 0) {
+                    //multiple of 10, means it deserves another drink for 50%
+                    //create a new promo code for this unique user
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.DAY_OF_YEAR, 7);
+                    PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
+                            "Te has ganado una bebida gratis!", 50, PromoType.EARNED);
+                    promoCodeRepository.createPromoCode(newUserPromoCode);
+
+                    Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
+
+                    emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
+                }
+            }
+
             Map<String, Object> emailParams = new HashMap<String, Object>();
             emailParams.put("productName", purchase.getProduct().getName());
 
@@ -208,6 +229,13 @@ public class ShopRestServiceImpl implements ShopRestService {
                 promoCodeRepository.redeemPromoCode(redemption);
                 //send email
                 emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
+
+                //get trainer if this promo code is assigned to a trainer
+                //Integer trainerPromoCodesUsed
+
+                //check number of times a trainer promo code have been used
+                //Integer promoCodesUsed = promoCodeRepository.getRedeemedPromoCodesByTriner();
+
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
             } else {
                 //send standard email

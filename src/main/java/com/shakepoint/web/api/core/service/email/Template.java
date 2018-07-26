@@ -4,6 +4,7 @@ public enum Template {
     OPEN_PROMO_CODE_CREATED("open-promo-code-created", "Código de descuento!"),
     SIGN_UP("successfully-signup","Registro en Shakepoint"),
     SUCCESSFUL_PROMO_PURCHASE("success-promo-purchase", "Compra procesada con éxito"),
+    EARNED_DRINK_DISCOUNT("earned-drink-discount", "Te has ganado un descuento!"),
     SUCCESSFUL_PURCHASE("success-purchase","Su compra ha sido procesada correctamente"),
     USER_BIRTHDATE_PROMO_CODE("birthdate-promo-code", "Es el mes de tu cumpleaños!"),
     TRAINER_PROMO_CODE_CREATED("trainer-promo-code-created", "Promociones para entrenadores"),

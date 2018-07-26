@@ -5,6 +5,7 @@ public class CreatePromoCodeRequest {
     private String expirationDate;
     private int discount;
     private String productId;
+    private String trainerId;
 
     public String getDescription() {
         return description;
@@ -36,5 +37,13 @@ public class CreatePromoCodeRequest {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    public String getTrainerId() {
+        return trainerId;
+    }
+
+    public void setTrainerId(String trainerId) {
+        this.trainerId = trainerId;
     }
 }
