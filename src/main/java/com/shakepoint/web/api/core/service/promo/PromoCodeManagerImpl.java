@@ -2,7 +2,9 @@ package com.shakepoint.web.api.core.service.promo;
 
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.PromoCode;
+import com.shakepoint.web.api.data.entity.PromoCodeRedeem;
 import com.shakepoint.web.api.data.entity.PromoType;
+import com.shakepoint.web.api.data.entity.User;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -41,5 +43,14 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         promoCodeEntity.setDiscount(discount);
         promoCodeEntity.setType(promoType);
         return promoCodeEntity;
+    }
+
+    @Override
+    public PromoCodeRedeem createPromoCodeRedemption(PromoCode promoCode, User user) {
+        PromoCodeRedeem redeem = new PromoCodeRedeem();
+        redeem.setPromoCode(promoCode);
+        redeem.setUser(user);
+        redeem.setRedemptionDate(ShakeUtils.DATE_FORMAT.format(new Date()));
+        return redeem;
     }
 }

@@ -8,6 +8,7 @@ public class PaymentDetails {
     private String reference;
     private String payworksResult;
     private String message;
+    private String computedMessage;
 
     public PaymentDetails(String authCode, String requestDate, String responseDate, String merchantId, String reference, String payworksResult, String message) {
         this.authCode = authCode;
@@ -45,5 +46,15 @@ public class PaymentDetails {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getComputedMessage() {
+        if (payworksResult.equals("A")) {
+            return "Compra realizada con éxito";
+        } else if (payworksResult.equals("D")) {
+            return "La tarjeta proporcionada ha sido declinada";
+        } else if (payworksResult.equals("T")) {
+            return "No se ha obtenido respuesta del autorizador, revisa los datos e intenta nuevamente";
+        } else return "La tarjeta proporcionada ha sido rechazada";
     }
 }

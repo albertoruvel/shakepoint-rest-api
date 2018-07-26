@@ -112,9 +112,8 @@ public class ShopRestServiceImpl implements ShopRestService {
 
     @Override
     public Response confirmPurchase(ConfirmPurchaseRequest request) {
-        PurchaseQRCode code = null;
         Purchase purchase = purchaseRepository.getPurchase(request.getPurchaseId());
-        User user;
+        User user = userRepository.get(authenticatedUser.getId());
         if (purchase == null) {
             LOG.error(String.format("No purchase found for %s", request.getPurchaseId()));
             return Response.status(Response.Status.BAD_REQUEST)
@@ -137,57 +136,95 @@ public class ShopRestServiceImpl implements ShopRestService {
                             .entity(new PurchaseQRCode(null, false, "El código de promoción es inválido")).build();
                 } else {
                     //check expiration date for promo code
-                    if (promoCodeManager.isPromoCodeExpired(promoCode)){
+                    if (promoCodeManager.isPromoCodeExpired(promoCode)) {
                         //expired
                         return Response.status(Response.Status.BAD_REQUEST)
                                 .entity(new PurchaseQRCode(null, false, "El código de promoción ha expirado")).build();
                     } else {
-                        //TODO: link promo code to purchase and save all data from promo code redemption
+                        //check if user already redeemed promo code
+                        if (promoCodeRepository.isPromoCodeAlreadyRedeemedByUser(promoCode.getCode(), user.getId())) {
+                            return Response.status(Response.Status.BAD_REQUEST)
+                                    .entity(new PurchaseQRCode(null, false, "El código de promoción ya ha sido canjeado anteriormente")).build();
+                        } else {
+                            //set new price for purchase
+                            purchase.setTotal(calculatePurchaseTotal(purchase.getTotal(), promoCode.getDiscount()));
+                            //call pay works to make payment
+                            return confirmPurchase(purchase, request, user, promoCode);
+                        }
                     }
                 }
-            }
-            user = userRepository.get(authenticatedUser.getId());
-            final String controlNumber = createControlNumber();
-            purchase.setControlNumber(controlNumber);
-            //update purchase
-            purchaseRepository.update(purchase);
-            PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber(),
-                    request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
-            if (paymentDetails == null) {
-                LOG.info("No payment details from payworks");
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new PurchaseQRCode(null, false, "Ha ocurrido un problema al realizar el pago, intenta nuevamente"))
-                        .build();
-            } else if (paymentDetails.getAuthCode() != null && paymentDetails.getPayworksResult().equals("A")) {
-                //check if purchase already contains a qr code
-                if (purchase.getQrCodeUrl() == null) {
-                    //try to retry upload for purchase
-                    jmsHandler.send(RETRY_UPLOAD_QUEUE_NAME, purchase.getId());
-                }
-                //payment went well
-                purchase.setUser(user);
-                purchase.setStatus(PurchaseStatus.AUTHORIZED);
-                purchase.setReference(paymentDetails.getReference());
-                purchaseRepository.update(purchase);
-                //send an email
-                List<String> productNames = new ArrayList();
-                productNames.add(purchase.getProduct().getName());
-                Map<String, Object> args = new HashMap();
-                args.put("productNames", productNames);
-                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, args);
-                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, "Compra realizada con éxito")).build();
-            } else if (paymentDetails.getPayworksResult().equals("D")) {
-                //declined
-                LOG.info("Declined");
-                return Response.ok(new PurchaseQRCode(null, false, "La tarjeta proporcionada ha sido declinada"))
-                        .build();
-            } else if (paymentDetails.getPayworksResult().equals("T")) {
-                LOG.info("Timeout on provider");
-                return Response.ok(new PurchaseQRCode(null, false, "No se ha obtenido respuesta del autorizador, revisa los datos e intenta nuevamente")).build();
             } else {
-                LOG.info("Rejected");
-                return Response.ok(new PurchaseQRCode(null, false, "La tarjeta proporcionada ha sido rechazada")).build();
+                return confirmPurchase(purchase, request, user, null);
             }
+
+        }
+    }
+
+    private double calculatePurchaseTotal(double total, int discount) {
+        if (discount == 100) {
+            //free drink!! :D
+            return 0;
+        } else {
+            double discDec = discount / 100;
+            double discValue = total * discDec;
+            return total - discValue;
+        }
+    }
+
+    private Response confirmPurchase(Purchase purchase, ConfirmPurchaseRequest request, User user, PromoCode promoCode) {
+        final String controlNumber = createControlNumber();
+        purchase.setControlNumber(controlNumber);
+        //update purchase
+        purchaseRepository.update(purchase);
+        PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber(),
+                request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
+        if (paymentDetails == null) {
+            LOG.info("No payment details from payworks");
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new PurchaseQRCode(null, false, "Ha ocurrido un problema al realizar el pago, intenta nuevamente"))
+                    .build();
+        } else if (paymentDetails.getAuthCode() != null && paymentDetails.getPayworksResult().equals("A")) {
+            //check if purchase already contains a qr code
+            if (purchase.getQrCodeUrl() == null) {
+                //try to retry upload for purchase
+                jmsHandler.send(RETRY_UPLOAD_QUEUE_NAME, purchase.getId());
+            }
+            //payment went well
+            purchase.setUser(user);
+            purchase.setStatus(PurchaseStatus.AUTHORIZED);
+            purchase.setReference(paymentDetails.getReference());
+            purchaseRepository.update(purchase);
+
+            Map<String, Object> emailParams = new HashMap<String, Object>();
+            emailParams.put("productName", purchase.getProduct().getName());
+
+            if (promoCode != null) {
+                emailParams.put("promoCode", promoCode.getCode());
+                emailParams.put("promoDescription", promoCode.getDescription());
+                //means user used promo code to pay this product
+                //create promo code redemption
+                PromoCodeRedeem redemption = promoCodeManager.createPromoCodeRedemption(promoCode, user);
+                //add to database
+                promoCodeRepository.redeemPromoCode(redemption);
+                //send email
+                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+            } else {
+                //send standard email
+                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+            }
+        } else if (paymentDetails.getPayworksResult().equals("D")) {
+            //declined
+            LOG.info("Declined");
+            return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage()))
+                    .build();
+        } else if (paymentDetails.getPayworksResult().equals("T")) {
+            LOG.info("Timeout on provider");
+            return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage())).build();
+        } else {
+            LOG.info("Rejected");
+            return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage())).build();
         }
     }
 
