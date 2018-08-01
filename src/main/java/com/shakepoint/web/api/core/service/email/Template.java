@@ -7,6 +7,7 @@ public enum Template {
     EARNED_DRINK_DISCOUNT("earned-drink-discount", "Te has ganado un descuento!"),
     SUCCESSFUL_PURCHASE("success-purchase","Su compra ha sido procesada correctamente"),
     USER_BIRTHDATE_PROMO_CODE("birthdate-promo-code", "Es el mes de tu cumpleaños!"),
+    NEW_TRAINER("trainer-welcome", "Bienvenido!"),
     TRAINER_PROMO_CODE_CREATED("trainer-promo-code-created", "Promociones para entrenadores"),
     NEW_PARTNER_ORDER_REQUEST_CLIENT("new_partner_order", "Petición Shakepoint"),
     FORGOT_PASSWORD_REQUEST("forgot_password_request", "Reestablecer contraseña"),

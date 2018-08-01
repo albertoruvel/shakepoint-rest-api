@@ -177,6 +177,14 @@ public class AdminResource {
     }
 
     @GET
+    @Path("getAllTrainers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllTrainers() {
+        return adminRestService.getAllTrainers();
+    }
+
+
+    @GET
     @Path("getActivePromos")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getActivePromos() {

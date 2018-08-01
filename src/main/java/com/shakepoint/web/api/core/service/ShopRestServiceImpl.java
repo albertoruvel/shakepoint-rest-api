@@ -238,7 +238,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     if (redemptionsCount % 10 == 0) {
                         //deserves 10% off on next drink
                         //TODO: creates a new promo code
-                        PromoCode trainerPromoCode = promoCodeManager.createPromoCode()
+                        //PromoCode trainerPromoCode = promoCodeManager.createPromoCode()
                     }
                 }
 

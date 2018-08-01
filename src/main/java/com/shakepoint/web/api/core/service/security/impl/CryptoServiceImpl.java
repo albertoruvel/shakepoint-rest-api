@@ -10,7 +10,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
+import java.security.MessageDigest;
 
 @Startup
 public class CryptoServiceImpl implements CryptoService {
@@ -23,25 +25,16 @@ public class CryptoServiceImpl implements CryptoService {
     @ApplicationProperty(name = "com.shakepoint.web.crypto.algorithm", type = ApplicationProperty.Types.SYSTEM)
     private String algorithm;
 
-    private Cipher cipher;
-    private SecretKeySpec secretKeySpec;
     private final Logger log = Logger.getLogger(getClass());
-
-    @PostConstruct
-    public void init(){
-        try{
-            secretKeySpec = new SecretKeySpec(key.getBytes(), algorithm);
-            cipher = Cipher.getInstance(algorithm);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-        }catch(Exception ex){
-            log.error("Could not initialize CryptoService", ex);
-        }
-    }
 
     @Override
     public String encrypt(String value) {
         try{
-            return new String(cipher.doFinal(value.getBytes()), "UTF-8");
+            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+            messageDigest.update(value.getBytes());
+            byte[] digest = messageDigest.digest();
+            String hex = DatatypeConverter.printHexBinary(digest);
+            return hex;
         }catch(Exception ex){
             log.error("Could not encrypt string value", ex);
             return null;

@@ -1,15 +1,15 @@
 package com.shakepoint.web.api.resource;
 
+import com.shakepoint.web.api.core.service.PartnerRestService;
 import com.shakepoint.web.api.core.service.security.AllowedUsers;
 import com.shakepoint.web.api.core.service.security.RequestPrincipal;
 import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
+import com.shakepoint.web.api.data.dto.request.partner.CreateTrainerRequest;
 import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -18,10 +18,22 @@ import javax.ws.rs.core.Response;
 @Secured
 public class PartnerResource {
 
+    @Inject
+    private PartnerRestService partnerRestService;
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("createTrainer")
+    public Response doSomethingWithRequestPrincipal(CreateTrainerRequest request){
+        return partnerRestService.createTrainer(request);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public void doSomethingWithRequestPrincipal(){
-        //Logger.getLogger(getClass()).info(requestPrincipal);
+    @Path("trainers")
+    public Response getTrainers() {
+        return partnerRestService.getTrainers();
     }
 
 }

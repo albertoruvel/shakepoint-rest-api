@@ -138,7 +138,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         User user = TransformationUtils.getUserFromTechnician(dto, cryptoService.encrypt(dto.getPassword()));
         //add the new technician
         try {
-            userRepository.addShakepointUser(user);
+             userRepository.addShakepointUser(user);
             return Response.ok().build();
         } catch (Exception ex) {
             log.error("Could not add technician: " + ex.getMessage());
@@ -491,6 +491,16 @@ public class AdminRestServiceImpl implements AdminRestService {
         emailParams.put("username", user.getName());
         //send email
         emailSender.sendEmail(user.getEmail(), Template.USER_BIRTHDATE_PROMO_CODE, emailParams);
+    }
+
+    @Override
+    public Response getAllTrainers() {
+        List<User> trainers = userRepository.getTrainers();
+        List<Trainer> trainersDto = new ArrayList<>();
+        trainers.stream().forEach(user -> {
+            //trainersDto.add(TransformationUtils.createTrainer(user.getId(), user.getName(), ))
+        });
+        return Response.ok(trainers).build();
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {

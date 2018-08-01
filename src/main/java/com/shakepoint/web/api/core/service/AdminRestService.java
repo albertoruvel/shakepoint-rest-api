@@ -16,7 +16,6 @@ public interface AdminRestService {
 
     public Response createNewTechnician(NewTechnicianRequest dto);
 
-
     public Response getMachines();
 
     public Response createNewMachine(NewMachineRequest dto);
@@ -54,4 +53,6 @@ public interface AdminRestService {
     public Response createTrainersPromoCode(CreatePromoCodeRequest request);
 
     public void createBirthDatePromoCode(String userId);
+
+    public Response getAllTrainers();
 }

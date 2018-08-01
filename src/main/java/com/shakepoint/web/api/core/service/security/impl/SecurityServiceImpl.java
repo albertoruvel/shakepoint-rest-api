@@ -66,7 +66,8 @@ public class SecurityServiceImpl implements SecurityService {
         User user = userRepository.getUserByEmail(request.getEmail());
         if (user != null) {
             //check pass
-            if (cryptoService.encrypt(request.getPassword()).equals(user.getPassword())) {
+            String password = cryptoService.encrypt(request.getPassword());
+            if (password.equals(user.getPassword())) {
                 //generate a new token
                 String token = ShakeUtils.getNextSessionToken();
                 //check role

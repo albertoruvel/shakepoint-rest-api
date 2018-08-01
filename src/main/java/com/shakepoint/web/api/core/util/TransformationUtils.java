@@ -2,12 +2,14 @@ package com.shakepoint.web.api.core.util;
 
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.repository.MachineRepository;
+import com.shakepoint.web.api.core.service.security.CryptoService;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.data.dto.request.SignupRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
+import com.shakepoint.web.api.data.dto.request.partner.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.response.*;
 import com.shakepoint.web.api.data.dto.response.admin.*;
 import com.shakepoint.web.api.data.entity.*;
@@ -269,5 +271,26 @@ public class TransformationUtils {
         Promotion promotion = new Promotion(promo.getId(), promo.getExpirationDate(), createSimpleProduct(product), promo.getDiscount(),
                 promo.getType().toString(), promo.getCode());
         return promotion;
+    }
+
+    public static User createUserFromTrainerRequest(CreateTrainerRequest request, String newToken, CryptoService cryptoService) {
+        User user = new User();
+        user.setPassword(cryptoService.encrypt(request.getPassword()));
+        user.setAccessToken(newToken);
+        user.setActive(true);
+        user.setConfirmed(false);
+        user.setCreationDate(ShakeUtils.DATE_FORMAT.format(new Date()));
+        user.setEmail(request.getEmail());
+        user.setName(request.getName());
+        user.setRole(SecurityRole.TRAINER.toString());
+        return user;
+    }
+
+    public static List<com.shakepoint.web.api.data.dto.response.partner.Trainer> createTrainers(List<User> trainers) {
+        List<com.shakepoint.web.api.data.dto.response.partner.Trainer> trainersList = new ArrayList<>();
+        trainers.stream().forEach(t -> {
+            trainersList.add(new com.shakepoint.web.api.data.dto.response.partner.Trainer(t.getId(), t.getName(), t.getEmail()));
+        });
+        return trainersList;
     }
 }

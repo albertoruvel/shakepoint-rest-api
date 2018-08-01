@@ -4,6 +4,7 @@ import com.shakepoint.web.api.core.repository.UserRepository;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
+import com.shakepoint.web.api.data.entity.PartnerTrainer;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
@@ -276,6 +277,33 @@ public class UserRepositoryImpl implements UserRepository {
         }catch(Exception ex){
             return null;
         }
+    }
+
+    @Override
+    public List<User> getTrainers() {
+        try{
+            return em.createQuery("SELECT u FROM User u WHERE u.role = 'trainer'")
+                    .getResultList();
+        }catch(Exception ex){
+            log.error("Could not get trainers", ex);
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void addPartnerTrainer(PartnerTrainer partnerTrainer) {
+        try{
+            em.persist(partnerTrainer);
+        }catch(Exception ex) {
+            log.error("Could not persis partner trainer relationship", ex);
+        }
+    }
+
+    @Override
+    public List<User> getTrainersForPartner(String id) {
+        return em.createQuery("SELECT pt.trainer from PartnerTrainer pt WHERE pt.partner.id = :id")
+                .setParameter("id", id).getResultList();
     }
 
 
