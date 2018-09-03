@@ -79,10 +79,14 @@ public class SecurityFilter implements ContainerRequestFilter {
         //get user by token
         User user = null;
         try {
-            user = userRepository.findUserByToken(token);
+            user = userRepository.findUserByToken(token.split(" ")[1]);
             if (user != null) {
                 for (SecurityRole role : roles) {
-                    if (SecurityRole.fromString(user.getRole()) == role) {
+                    if (SecurityRole.ALL == role) {
+                        userAuthenticatedEvent.fire(user.getId());
+                        return true;
+                    }
+                    else if (SecurityRole.fromString(user.getRole()) == role) {
                         //user authenticated
                         userAuthenticatedEvent.fire(user.getId());
                         return true;

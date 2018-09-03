@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.resource;
 
 import com.shakepoint.web.api.core.service.security.SecurityService;
+import com.shakepoint.web.api.data.dto.request.ResetPasswordRequest;
 import com.shakepoint.web.api.data.dto.request.SignInRequest;
 import com.shakepoint.web.api.data.dto.request.SignupRequest;
 
@@ -42,9 +43,8 @@ public class SecurityResource {
     @Path("resetPassword")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response resetPassword() {
-        // TODO: !!!!
-        return null;
+    public Response resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        return securityService.resetPassword(resetPasswordRequest);
     }
 
     @POST

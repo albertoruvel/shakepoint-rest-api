@@ -10,9 +10,28 @@ import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import com.shakepoint.web.api.data.dto.request.partner.CreateTrainerRequest;
-import com.shakepoint.web.api.data.dto.response.*;
-import com.shakepoint.web.api.data.dto.response.admin.*;
-import com.shakepoint.web.api.data.entity.*;
+import com.shakepoint.web.api.data.dto.response.ProductDTO;
+import com.shakepoint.web.api.data.dto.response.PurchaseCodeResponse;
+import com.shakepoint.web.api.data.dto.response.SimpleMachineProduct;
+import com.shakepoint.web.api.data.dto.response.UserProfileResponse;
+import com.shakepoint.web.api.data.dto.response.UserPurchaseResponse;
+import com.shakepoint.web.api.data.dto.response.admin.ProductLevelDescription;
+import com.shakepoint.web.api.data.dto.response.admin.Promotion;
+import com.shakepoint.web.api.data.dto.response.admin.SimpleMachine;
+import com.shakepoint.web.api.data.dto.response.admin.SimpleProduct;
+import com.shakepoint.web.api.data.dto.response.admin.Technician;
+import com.shakepoint.web.api.data.dto.response.admin.TechnicianMachine;
+import com.shakepoint.web.api.data.dto.response.admin.VendingProductDetails;
+import com.shakepoint.web.api.data.dto.response.partner.Trainer;
+import com.shakepoint.web.api.data.entity.Product;
+import com.shakepoint.web.api.data.entity.PromoCode;
+import com.shakepoint.web.api.data.entity.PromoType;
+import com.shakepoint.web.api.data.entity.Purchase;
+import com.shakepoint.web.api.data.entity.User;
+import com.shakepoint.web.api.data.entity.UserProfile;
+import com.shakepoint.web.api.data.entity.VendingConnection;
+import com.shakepoint.web.api.data.entity.VendingMachine;
+import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -49,6 +68,7 @@ public class TransformationUtils {
         User user = new User();
         user.setActive(true);
         user.setConfirmed(false);
+        user.setAccessToken(ShakeUtils.getNextSessionToken());
         user.setCreationDate(ShakeUtils.DATE_FORMAT.format(new Date()));
         user.setEmail(request.getEmail());
         user.setName(request.getName());
@@ -87,15 +107,6 @@ public class TransformationUtils {
 
     public static UserProfile getProfile(String userId, UserProfileRequest request) {
         UserProfile profile = new UserProfile();
-        try {
-            //creates a date
-            Date date = ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.parse(request.getBirthday());
-            //format with shakepoint default format
-            String birth = ShakeUtils.SIMPLE_DATE_FORMAT.format(date);
-            profile.setBirthday(birth);
-        } catch (ParseException ex) {
-
-        }
         profile.setHeight(request.getHeight());
         profile.setWeight(request.getWeight());
         return profile;
@@ -151,6 +162,7 @@ public class TransformationUtils {
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(encryptedPassword);
+        user.setAccessToken(ShakeUtils.getNextSessionToken());
         user.setConfirmed(false);
         user.setActive(true);
         user.setCreationDate(ShakeUtils.DATE_FORMAT.format(new Date()));
@@ -186,10 +198,10 @@ public class TransformationUtils {
         return codes;
     }
 
-    public static UserProfileResponse createUserProfile(UserProfile userProfile) {
+    public static UserProfileResponse createUserProfile(UserProfile userProfile, double totalPurchases) {
         UserProfileResponse response = new UserProfileResponse(userProfile.getUser().getName(), userProfile.getUser().getId(),
                 userProfile.getUser().getCreationDate(), true, userProfile.getBirthday(), userProfile.getWeight(),
-                userProfile.getHeight(), getTotalPurchases(userProfile.getUser().getPurchases()), userProfile.getUser().getEmail());
+                userProfile.getHeight(), totalPurchases, userProfile.getUser().getEmail());
         return response;
     }
 
@@ -267,10 +279,14 @@ public class TransformationUtils {
         }
     }
 
-    public static Promotion createPromoCode(PromoCode promo, Product product) {
-        Promotion promotion = new Promotion(promo.getId(), promo.getExpirationDate(), createSimpleProduct(product), promo.getDiscount(),
-                promo.getType().toString(), promo.getCode());
-        return promotion;
+    public static Promotion createPromoCode(PromoCode promo, Product product, Trainer trainer) {
+        if (product != null) {
+            return new Promotion(promo.getId(), promo.getExpirationDate(), createSimpleProduct(product), promo.getDiscount(),
+                    PromoType.fromValue(promo.getType()).toString(), promo.getCode(), trainer);
+        } else {
+            return new Promotion(promo.getId(), promo.getExpirationDate(), null, promo.getDiscount(),
+                    PromoType.fromValue(promo.getType()).toString(), promo.getCode(), trainer);
+        }
     }
 
     public static User createUserFromTrainerRequest(CreateTrainerRequest request, String newToken, CryptoService cryptoService) {
@@ -289,8 +305,12 @@ public class TransformationUtils {
     public static List<com.shakepoint.web.api.data.dto.response.partner.Trainer> createTrainers(List<User> trainers) {
         List<com.shakepoint.web.api.data.dto.response.partner.Trainer> trainersList = new ArrayList<>();
         trainers.stream().forEach(t -> {
-            trainersList.add(new com.shakepoint.web.api.data.dto.response.partner.Trainer(t.getId(), t.getName(), t.getEmail()));
+            trainersList.add(createTrainer(t.getId(), t.getName(), t.getEmail()));
         });
         return trainersList;
+    }
+
+    public static com.shakepoint.web.api.data.dto.response.partner.Trainer createTrainer(String id, String name, String email) {
+        return new com.shakepoint.web.api.data.dto.response.partner.Trainer(id, name, email);
     }
 }

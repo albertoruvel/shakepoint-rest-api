@@ -4,6 +4,8 @@ public class SignupRequest {
     private String name;
     private String email;
     private String password;
+    private String birthdate;
+    private String facebookId;
 
     public SignupRequest() {
         super();
@@ -33,5 +35,19 @@ public class SignupRequest {
         this.password = password;
     }
 
+    public String getBirthdate() {
+        return birthdate;
+    }
 
+    public void setBirthdate(String birthdate) {
+        this.birthdate = birthdate;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
 }

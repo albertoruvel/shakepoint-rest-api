@@ -238,22 +238,22 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User get(String id) {
-        try{
+        try {
             return (User) em.createQuery("SELECT u FROM User u WHERE u.id = :id")
                     .setParameter("id", id)
                     .getSingleResult();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
 
     @Override
     public UserPassword getUserPassword(String userId) {
-        try{
-            return (UserPassword) em.createQuery("SELECT u FROM UserPassword WHERE u.userId = :userId")
+        try {
+            return (UserPassword) em.createQuery("SELECT u FROM UserPassword u WHERE u.userId = :userId")
                     .setParameter("userId", userId)
                     .getSingleResult();
-        }catch(Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -261,30 +261,34 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     @Transactional
     public void updateUserPassword(UserPassword userPassword) {
-        try{
-            em.merge(userPassword);
-        }catch(Exception ex){
+        try {
+            em.createNativeQuery("UPDATE user_password SET password_token = ?, token_expiration = ?, reset_count = ? WHERE id = ?")
+                    .setParameter(1, userPassword.getToken())
+                    .setParameter(2, userPassword.getExpirationDate())
+                    .setParameter(3, userPassword.getResetCount())
+                    .setParameter(4, userPassword.getId()).executeUpdate();
+        } catch (Exception ex) {
             log.error("Could not add user password", ex);
         }
     }
 
     @Override
     public UserPassword getUserPasswordByToken(String token) {
-        try{
+        try {
             return (UserPassword) em.createQuery("SELECT u FROM UserPassword u WHERE u.token = :token")
                     .setParameter("token", token)
                     .getSingleResult();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
 
     @Override
     public List<User> getTrainers() {
-        try{
+        try {
             return em.createQuery("SELECT u FROM User u WHERE u.role = 'trainer'")
                     .getResultList();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.error("Could not get trainers", ex);
             return null;
         }
@@ -293,9 +297,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     @Transactional
     public void addPartnerTrainer(PartnerTrainer partnerTrainer) {
-        try{
+        try {
             em.persist(partnerTrainer);
-        }catch(Exception ex) {
+        } catch (Exception ex) {
             log.error("Could not persis partner trainer relationship", ex);
         }
     }
@@ -304,6 +308,38 @@ public class UserRepositoryImpl implements UserRepository {
     public List<User> getTrainersForPartner(String id) {
         return em.createQuery("SELECT pt.trainer from PartnerTrainer pt WHERE pt.partner.id = :id")
                 .setParameter("id", id).getResultList();
+    }
+
+    @Override
+    public User getUserByFacebookId(String facebookId) {
+        try {
+            return (User) em.createQuery("SELECT u.user FROM Profile u WHERE u.facebookId = :id")
+                    .setParameter("id", facebookId)
+                    .getSingleResult();
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    @Override
+    public void addUserPassword(UserPassword userPassword) {
+        try {
+            em.persist(userPassword);
+        } catch (Exception ex) {
+            log.error("Could not persis user password", ex);
+        }
+    }
+
+    @Override
+    public void updateUserPassword(String encryptedPassword, String userId) {
+        try {
+            em.createNativeQuery("UPDATE user SET password = ? WHERE id = ?")
+                    .setParameter(1, encryptedPassword)
+                    .setParameter(2, userId)
+                    .executeUpdate();
+        } catch (Exception ex) {
+            log.error("Could not update user password", ex);
+        }
     }
 
 

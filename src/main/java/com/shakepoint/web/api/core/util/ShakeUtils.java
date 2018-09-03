@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author Alberto Rubalcaba
@@ -41,5 +42,10 @@ public class ShakeUtils {
 
     public static String getNextSessionToken() {
         return new BigInteger(130, random).toString();
+    }
+
+    public static String getResetPasswordToken() {
+        final String token = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        return token;
     }
 }

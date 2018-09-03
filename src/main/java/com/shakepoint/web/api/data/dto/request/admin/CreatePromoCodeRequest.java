@@ -6,6 +6,8 @@ public class CreatePromoCodeRequest {
     private int discount;
     private String productId;
     private String trainerId;
+    private int promotionType;
+    private boolean allProducts;
 
     public String getDescription() {
         return description;
@@ -45,5 +47,21 @@ public class CreatePromoCodeRequest {
 
     public void setTrainerId(String trainerId) {
         this.trainerId = trainerId;
+    }
+
+    public int getPromotionType() {
+        return promotionType;
+    }
+
+    public void setPromotionType(int promotionType) {
+        this.promotionType = promotionType;
+    }
+
+    public boolean isAllProducts() {
+        return allProducts;
+    }
+
+    public void setAllProducts(boolean allProducts) {
+        this.allProducts = allProducts;
     }
 }

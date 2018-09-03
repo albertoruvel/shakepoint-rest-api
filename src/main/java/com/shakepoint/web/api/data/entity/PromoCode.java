@@ -17,8 +17,7 @@ public class PromoCode {
     private String code;
 
     @Column(name = "promo_type")
-    @Enumerated(value = EnumType.ORDINAL)
-    private PromoType type;
+    private Integer type;
 
     @Column(name = "discount")
     private int discount;
@@ -62,11 +61,11 @@ public class PromoCode {
         this.code = code;
     }
 
-    public PromoType getType() {
+    public Integer getType() {
         return type;
     }
 
-    public void setType(PromoType type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 

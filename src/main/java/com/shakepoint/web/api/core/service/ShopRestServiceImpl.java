@@ -15,6 +15,7 @@ import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
+import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.response.*;
 import com.shakepoint.web.api.data.entity.*;
 import org.apache.log4j.Logger;
@@ -207,7 +208,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     calendar.setTime(new Date());
                     calendar.add(Calendar.DAY_OF_YEAR, 7);
                     PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
-                            "Te has ganado una bebida gratis!", 50, PromoType.EARNED);
+                            "Te has ganado una bebida gratis!", 50, PromoType.EARNED.getValue());
                     promoCodeRepository.createPromoCode(newUserPromoCode);
 
                     Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
@@ -276,9 +277,10 @@ public class ShopRestServiceImpl implements ShopRestService {
         try {
             UserProfile userProfile = userRepository.getUserProfile(user.getId());
             if (userProfile == null) {
-                profile = new UserProfileResponse(user.getName(), user.getId(), user.getCreationDate(), false, null, 0.0, 0.0, 0.0, user.getEmail());
+                profile = new UserProfileResponse(user.getName(), user.getId(), user.getCreationDate(), false, userProfile.getBirthday(), 0.0, 0.0, 0.0, user.getEmail());
             } else {
-                profile = TransformationUtils.createUserProfile(userProfile);
+                double purchasesTotal = TransformationUtils.getTotalPurchases(user.getPurchases());
+                profile = TransformationUtils.createUserProfile(userProfile, purchasesTotal);
             }
         } catch (Exception ex) {
 
@@ -298,7 +300,6 @@ public class ShopRestServiceImpl implements ShopRestService {
             LOG.info("Creating user profile");
             userRepository.saveProfile(profile);
         } else {
-            existingProfile.setBirthday(request.getBirthday());
             existingProfile.setHeight(request.getHeight());
             existingProfile.setWeight(request.getWeight());
             LOG.info("Updating user profile");
@@ -337,6 +338,22 @@ public class ShopRestServiceImpl implements ShopRestService {
             //get the first one
             return Response.ok(new AvailablePurchaseResponse(purchases.get(0).getId())).build();
         }
+    }
+
+    @Override
+    public Response validatePromoCode(ValidatePromoCodeRequest request) {
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        //get promo code
+        PromoCode promoCode = promoCodeRepository.findPromoCodeByCode(request.getPromoCode());
+        if (promoCode == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        PromoCodeValidation validation = promoCodeManager.validatePromoCode(request);
+        return Response.ok(validation).build();
     }
 
 

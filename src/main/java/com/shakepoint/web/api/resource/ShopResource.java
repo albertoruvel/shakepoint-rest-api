@@ -6,6 +6,7 @@ import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
+import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -54,6 +55,14 @@ public class ShopResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAuthorizedPurchasesO(@QueryParam("machineId") String machineId) {
         return shopRestService.getActiveQrCodes(machineId);
+    }
+
+    @POST
+    @Path("validatePromoCode")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response validatePromoCode(ValidatePromoCodeRequest request){
+        return shopRestService.validatePromoCode(request);
     }
 
     @Path("confirmPurchase")

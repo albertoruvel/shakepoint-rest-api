@@ -2,6 +2,7 @@ package com.shakepoint.web.api.core.service;
 
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
+import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 
 import javax.ws.rs.core.Response;
 
@@ -25,4 +26,6 @@ public interface ShopRestService {
     public Response getProductDetails(String productId);
 
     public Response getAvailablePurchaseForMachine(String productId, String machineId);
+
+    public Response validatePromoCode(ValidatePromoCodeRequest request);
 }

@@ -2,8 +2,7 @@ package com.shakepoint.web.api.data.dto.request;
 
 public class UserProfileRequest {
 	private double height; 
-	private double weight; 
-	private String birthday;
+	private double weight;
 	public UserProfileRequest() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -21,11 +20,5 @@ public class UserProfileRequest {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-	public String getBirthday() {
-		return birthday;
-	}
-	public void setBirthday(String birthday) {
-		this.birthday = birthday;
-	} 
 	
 }

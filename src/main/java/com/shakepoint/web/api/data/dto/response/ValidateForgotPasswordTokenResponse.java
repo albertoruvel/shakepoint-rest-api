@@ -1,17 +1,17 @@
 package com.shakepoint.web.api.data.dto.response;
 
 public class ValidateForgotPasswordTokenResponse {
-    private Boolean isTokenValid;
+    private Boolean tokenValid;
 
-    public ValidateForgotPasswordTokenResponse(Boolean isTokenValid) {
-        this.isTokenValid = isTokenValid;
+    public ValidateForgotPasswordTokenResponse(Boolean tokenValid) {
+        this.tokenValid = tokenValid;
     }
 
-    public Boolean getTokenValid() {
-        return isTokenValid;
+    public Boolean isTokenValid() {
+        return tokenValid;
     }
 
     public void setTokenValid(Boolean tokenValid) {
-        isTokenValid = tokenValid;
+        this.tokenValid = tokenValid;
     }
 }

@@ -1,6 +1,6 @@
 package com.shakepoint.web.api.data.dto.response.admin;
 
-import com.shakepoint.web.api.data.dto.response.ProductDTO;
+import com.shakepoint.web.api.data.dto.response.partner.Trainer;
 
 public class Promotion {
     private String id;
@@ -9,14 +9,16 @@ public class Promotion {
     private int discount;
     private String type;
     private String code;
+    private Trainer trainer;
 
-    public Promotion(String id, String expirationDate, SimpleProduct product, int discount, String type, String code) {
+    public Promotion(String id, String expirationDate, SimpleProduct product, int discount, String type, String code, Trainer trainer) {
         this.id = id;
         this.expirationDate = expirationDate;
         this.product = product;
         this.discount = discount;
         this.type = type;
         this.code = code;
+        this.trainer = trainer;
     }
 
     public String getId() {
@@ -65,5 +67,13 @@ public class Promotion {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
     }
 }

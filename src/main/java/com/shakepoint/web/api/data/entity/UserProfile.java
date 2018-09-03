@@ -22,6 +22,9 @@ public class UserProfile {
     @Column(name = "height")
     private double height;
 
+    @Column(name = "facebook_id")
+    private String facebookId;
+
     public UserProfile() {
         id = UUID.randomUUID().toString();
     }
@@ -64,5 +67,13 @@ public class UserProfile {
 
     public void setHeight(double height) {
         this.height = height;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
     }
 }

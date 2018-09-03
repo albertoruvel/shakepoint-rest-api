@@ -48,4 +48,10 @@ public interface UserRepository {
     public void addPartnerTrainer(PartnerTrainer partnerTrainer);
 
     public List<User> getTrainersForPartner(String id);
+
+    User getUserByFacebookId(String facebookId);
+
+    void addUserPassword(UserPassword userPassword);
+
+    void updateUserPassword(String encryptedPassword, String userId);
 }

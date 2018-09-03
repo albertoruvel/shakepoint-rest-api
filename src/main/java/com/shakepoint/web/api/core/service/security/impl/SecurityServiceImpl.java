@@ -7,13 +7,16 @@ import com.shakepoint.web.api.core.service.email.Template;
 import com.shakepoint.web.api.core.service.security.*;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
+import com.shakepoint.web.api.data.dto.request.ResetPasswordRequest;
 import com.shakepoint.web.api.data.dto.request.SignInRequest;
 import com.shakepoint.web.api.data.dto.request.SignupRequest;
 import com.shakepoint.web.api.data.dto.response.AuthenticationResponse;
 import com.shakepoint.web.api.data.dto.response.ForgotPasswordResponse;
+import com.shakepoint.web.api.data.dto.response.ResetPasswordResponse;
 import com.shakepoint.web.api.data.dto.response.ValidateForgotPasswordTokenResponse;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
+import com.shakepoint.web.api.data.entity.UserProfile;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -45,14 +48,19 @@ public class SecurityServiceImpl implements SecurityService {
     @ApplicationProperty(name = "com.shakepoint.web.admin.token", type = ApplicationProperty.Types.SYSTEM)
     private String adminToken;
 
-    @Inject
-    @AuthenticatedUser
-    private RequestPrincipal authenticatedUser;
-
     @Override
     public Response authenticate(SignInRequest request) {
-        //check first if is admin
-        if (request.getEmail().equalsIgnoreCase(adminEmail)) {
+        //check if logged with facebook
+        if (request.getFacebookId() != null && ! request.getFacebookId().isEmpty()) {
+            //log in with facebook
+            User existingUser = userRepository.getUserByFacebookId(request.getFacebookId());
+            if (existingUser != null) {
+                return Response.ok(new AuthenticationResponse("Welcome, facebook user", existingUser.getAccessToken(), true, SecurityRole.MEMBER.getValue())).build();
+            } else {
+                return Response.ok(new AuthenticationResponse("Invalid credentials "))
+                        .build();
+            }
+        } else if (request.getEmail().equalsIgnoreCase(adminEmail)) {
             //check password
             if (request.getPassword().equals(adminPassword)) {
                 //create a response with pre-defined token
@@ -62,6 +70,7 @@ public class SecurityServiceImpl implements SecurityService {
                         .build();
             }
         }
+
         //check user
         User user = userRepository.getUserByEmail(request.getEmail());
         if (user != null) {
@@ -101,9 +110,23 @@ public class SecurityServiceImpl implements SecurityService {
             final String encryptedPass = cryptoService.encrypt(request.getPassword());
             User user = TransformationUtils.getUser(request, encryptedPass);
             userRepository.addShakepointUser(user);
-            ar.setAuthenticationToken(ShakeUtils.getNextSessionToken());
+            //create user profile
+            UserProfile userProfile = new UserProfile();
+            //check if logged with facebook
+            if (request.getFacebookId() != null && ! request.getFacebookId().isEmpty()) {
+                userProfile.setFacebookId(request.getFacebookId());
+                //TODO: create a promo code in here....
+
+            }
+            userProfile.setBirthday(request.getBirthdate());
+            userProfile.setHeight(0);
+            userProfile.setUser(user);
+            userProfile.setWeight(0);
+            userRepository.saveProfile(userProfile);
+            ar.setAuthenticationToken(user.getAccessToken());
             ar.setMessage("User signed up successfully");
             ar.setSuccess(true);
+            ar.setRole(SecurityRole.MEMBER.toString());
             //Send Email
             final Map<String, Object> parameters = new HashMap<String, Object>(1);
             parameters.put("name", user.getName());
@@ -126,19 +149,25 @@ public class SecurityServiceImpl implements SecurityService {
         }
 
         //create a new token
-        final String forgotPasswordToken = ShakeUtils.getNextSessionToken();
+        final String forgotPasswordToken = ShakeUtils.getResetPasswordToken();
         //check if user already tried to restore password
-        UserPassword userPassword = userRepository.getUserPassword(authenticatedUser.getId());
+        UserPassword userPassword = userRepository.getUserPassword(user.getId());
         if (userPassword == null) {
             //create a new one
             userPassword = new UserPassword();
             userPassword.setExpirationDate(createNewPasswordExpirationToken());
             userPassword.setToken(forgotPasswordToken);
-            userPassword.setUserId(authenticatedUser.getId());
-            userRepository.updateUserPassword(userPassword);
+            userPassword.setUserId(userPassword.getUserId());
+            userPassword.setUserId(user.getId());
+            userRepository.addUserPassword(userPassword);
         } else {
             userPassword.setToken(forgotPasswordToken);
             userPassword.setExpirationDate(createNewPasswordExpirationToken());
+            if (userPassword.getResetCount() == null) {
+                userPassword.setResetCount(1);
+            } else {
+                userPassword.setResetCount(userPassword.getResetCount() + 1);
+            }
             userRepository.updateUserPassword(userPassword);
         }
 
@@ -170,13 +199,30 @@ public class SecurityServiceImpl implements SecurityService {
                 return Response.ok(new ValidateForgotPasswordTokenResponse(false)).build();
             } else {
                 //get minutes between dates
-                Integer minutes = ((int)expirationDate.getTime() / 60000) - ((int)currentDate.getTime() / 60000);
+                Integer minutes = ((int) expirationDate.getTime() / 60000) - ((int) currentDate.getTime() / 60000);
                 if (minutes > 60) {
                     return Response.ok(new ValidateForgotPasswordTokenResponse(false)).build();
-                }else {
+                } else {
                     return Response.ok(new ValidateForgotPasswordTokenResponse(true)).build();
                 }
             }
+        }
+    }
+
+    @Override
+    public Response resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        //check token
+        UserPassword userPassword = userRepository.getUserPasswordByToken(resetPasswordRequest.getToken());
+        if (userPassword == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ResetPasswordResponse("El código de seguridad es inválido")).build();
+        } else {
+            //create password
+            final String encryptedPassword = cryptoService.encrypt(resetPasswordRequest.getNewPassword());
+            userRepository.updateUserPassword(encryptedPassword, userPassword.getUserId());
+
+            //TODO: send email here!!!
+            return Response.ok(new ResetPasswordResponse("La contraseña ha sido cambiada exitosamente")).build();
         }
     }
 

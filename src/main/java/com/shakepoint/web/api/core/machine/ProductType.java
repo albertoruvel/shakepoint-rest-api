@@ -14,11 +14,11 @@ public enum ProductType {
     }
 
     public static ProductType getProductType(String value) {
-        if (value.toUpperCase().equals("PROTEIN")) {
+        if (value.equals(PROTEIN.clientValue)) {
             return PROTEIN;
-        } else if (value.toUpperCase().equals("AMINO_ACID")) {
+        } else if (value.equals(AMINO_ACID.clientValue)) {
             return AMINO_ACID;
-        } else if (value.toUpperCase().equals("OXIDE")) {
+        } else if (value.equals(OXIDE.clientValue)) {
             return OXIDE;
         } else return null;
     }

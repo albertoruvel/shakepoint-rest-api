@@ -168,14 +168,6 @@ public class AdminResource {
         return adminRestService.createOpenPromoCode(request);
     }
 
-    @POST
-    @Path("createTrainersPromoCode")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createTrainersPromoCode(CreatePromoCodeRequest request) {
-        return adminRestService.createTrainersPromoCode(request);
-    }
-
     @GET
     @Path("getAllTrainers")
     @Produces(MediaType.APPLICATION_JSON)

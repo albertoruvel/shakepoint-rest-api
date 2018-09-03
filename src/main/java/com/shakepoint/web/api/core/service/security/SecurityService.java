@@ -1,5 +1,6 @@
 package com.shakepoint.web.api.core.service.security;
 
+import com.shakepoint.web.api.data.dto.request.ResetPasswordRequest;
 import com.shakepoint.web.api.data.dto.request.SignInRequest;
 import com.shakepoint.web.api.data.dto.request.SignupRequest;
 
@@ -12,4 +13,6 @@ public interface SecurityService {
     public Response forgotPassword(String email);
 
     public Response validateForgotPasswordToken(String token) throws Exception;
+
+    public Response resetPassword(ResetPasswordRequest resetPasswordRequest);
 }

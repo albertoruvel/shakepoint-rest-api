@@ -41,7 +41,7 @@ public class User {
     @Column(name = "access_token")
     private String accessToken;
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Purchase> purchases;
 
     public User() {

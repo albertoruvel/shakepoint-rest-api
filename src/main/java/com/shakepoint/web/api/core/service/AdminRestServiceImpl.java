@@ -20,7 +20,21 @@ import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import com.shakepoint.web.api.data.dto.response.SimpleMachineProduct;
-import com.shakepoint.web.api.data.dto.response.admin.*;
+import com.shakepoint.web.api.data.dto.response.admin.AdminIndexContent;
+import com.shakepoint.web.api.data.dto.response.admin.CreatePromoCodeResponse;
+import com.shakepoint.web.api.data.dto.response.admin.GetVendingProducts;
+import com.shakepoint.web.api.data.dto.response.admin.MachineProductsContent;
+import com.shakepoint.web.api.data.dto.response.admin.PerMachineValues;
+import com.shakepoint.web.api.data.dto.response.admin.Promotion;
+import com.shakepoint.web.api.data.dto.response.admin.SimpleMachine;
+import com.shakepoint.web.api.data.dto.response.admin.SimpleProduct;
+import com.shakepoint.web.api.data.dto.response.admin.Technician;
+import com.shakepoint.web.api.data.dto.response.admin.TechnicianMachinesContent;
+import com.shakepoint.web.api.data.dto.response.admin.TotalIncomeValues;
+import com.shakepoint.web.api.data.dto.response.admin.UserDescription;
+import com.shakepoint.web.api.data.dto.response.admin.VendingProductDetails;
+import com.shakepoint.web.api.data.dto.response.admin.VendingProductResponse;
+import com.shakepoint.web.api.data.dto.response.partner.Trainer;
 import com.shakepoint.web.api.data.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -378,12 +392,17 @@ public class AdminRestServiceImpl implements AdminRestService {
         }
 
         //create a new promo code
-        PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.OPEN);
+        PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), request.getPromotionType());
         Product product;
+        User trainer;
         //check if any product id
         if (request.getProductId() != null && !request.getProductId().isEmpty()) {
             product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
+        }
+        if (request.getTrainerId() != null && ! request.getTrainerId().isEmpty()) {
+            trainer = userRepository.get(request.getTrainerId());
+            promoCode.setTrainer(trainer);
         }
         //save it
         promoCodeRepository.createPromoCode(promoCode);
@@ -417,13 +436,20 @@ public class AdminRestServiceImpl implements AdminRestService {
             promoCodes.stream().forEach(promo -> {
                 //check expiration
                 if (!promoCodeManager.isPromoCodeExpired(promo)) {
-                    Product product = productRepository.getProduct(promo.getProduct().getId());
-                    promos.add(TransformationUtils.createPromoCode(promo, product));
+                    Product product = null;
+                    Trainer trainer = null;
+                    if (promo.getProduct() != null) {
+                        product = productRepository.getProduct(promo.getProduct().getId());
+                    } else if (promo.getTrainer() != null){
+                        trainer = TransformationUtils.createTrainer(promo.getTrainer().getId(),
+                                promo.getTrainer().getName(), promo.getTrainer().getEmail());
+                    }
+                    promos.add(TransformationUtils.createPromoCode(promo, product, trainer));
                 }
             });
             return Response.ok(promos).build();
         } catch (Exception ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
     }
@@ -444,7 +470,7 @@ public class AdminRestServiceImpl implements AdminRestService {
                     .entity(new CreatePromoCodeResponse("Promo code expiration date is required")).build();
         }
 
-        PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.TRAINER);
+        PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.TRAINER.getValue());
         if (request.getProductId() != null && !request.getProductId().isEmpty()) {
             Product product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
@@ -482,7 +508,7 @@ public class AdminRestServiceImpl implements AdminRestService {
 
         //create promo code
         PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
-                "Mes del cumpleañero!", 100, PromoType.BIRTHDATE);
+                "Mes del cumpleañero!", 100, PromoType.BIRTHDATE.getValue());
         //this promo code includes any free drink
         promoCodeRepository.createPromoCode(promoCode);
 
@@ -498,9 +524,9 @@ public class AdminRestServiceImpl implements AdminRestService {
         List<User> trainers = userRepository.getTrainers();
         List<Trainer> trainersDto = new ArrayList<>();
         trainers.stream().forEach(user -> {
-            //trainersDto.add(TransformationUtils.createTrainer(user.getId(), user.getName(), ))
+            trainersDto.add(TransformationUtils.createTrainer(user.getId(), user.getName(), user.getEmail()));
         });
-        return Response.ok(trainers).build();
+        return Response.ok(trainersDto).build();
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {
