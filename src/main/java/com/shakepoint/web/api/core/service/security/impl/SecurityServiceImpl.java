@@ -17,6 +17,7 @@ import com.shakepoint.web.api.data.dto.response.ValidateForgotPasswordTokenRespo
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
+import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -47,6 +48,8 @@ public class SecurityServiceImpl implements SecurityService {
     @Inject
     @ApplicationProperty(name = "com.shakepoint.web.admin.token", type = ApplicationProperty.Types.SYSTEM)
     private String adminToken;
+
+    private Logger log = Logger.getLogger(getClass());
 
     @Override
     public Response authenticate(SignInRequest request) {
@@ -142,6 +145,7 @@ public class SecurityServiceImpl implements SecurityService {
                     .entity(new ForgotPasswordResponse("No email was provided")).build();
         }
         //get user by email
+        log.info(email + " forgot password request");
         User user = userRepository.getUserByEmail(email);
         if (user == null) {
             return Response.status(Response.Status.BAD_REQUEST)

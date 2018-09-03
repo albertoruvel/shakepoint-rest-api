@@ -434,18 +434,15 @@ public class AdminRestServiceImpl implements AdminRestService {
         List<Promotion> promos = new ArrayList<Promotion>();
         try {
             promoCodes.stream().forEach(promo -> {
-                //check expiration
-                if (!promoCodeManager.isPromoCodeExpired(promo)) {
-                    Product product = null;
-                    Trainer trainer = null;
-                    if (promo.getProduct() != null) {
-                        product = productRepository.getProduct(promo.getProduct().getId());
-                    } else if (promo.getTrainer() != null){
-                        trainer = TransformationUtils.createTrainer(promo.getTrainer().getId(),
-                                promo.getTrainer().getName(), promo.getTrainer().getEmail());
-                    }
-                    promos.add(TransformationUtils.createPromoCode(promo, product, trainer));
+                Product product = null;
+                Trainer trainer = null;
+                if (promo.getProduct() != null) {
+                    product = productRepository.getProduct(promo.getProduct().getId());
+                } else if (promo.getTrainer() != null){
+                    trainer = TransformationUtils.createTrainer(promo.getTrainer().getId(),
+                            promo.getTrainer().getName(), promo.getTrainer().getEmail());
                 }
+                promos.add(TransformationUtils.createPromoCode(promo, product, trainer));
             });
             return Response.ok(promos).build();
         } catch (Exception ex) {
