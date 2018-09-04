@@ -154,7 +154,6 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
                 validation.setNewPrice(product.getPrice() - validation.getDiscount());
                 break;
         }
-        validation.setNewPrice(promoCode.getProduct().getPrice() - validation.getDiscount());
         return validation;
     }
 
