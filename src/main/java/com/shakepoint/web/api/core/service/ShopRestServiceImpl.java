@@ -214,7 +214,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     calendar.setTime(new Date());
                     calendar.add(Calendar.DAY_OF_YEAR, 7);
                     PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
-                            "Te has ganado una bebida gratis!", 50, PromoType.EARNED.getValue());
+                            "Te has ganado un descuento!", 50, PromoType.EARNED.getValue());
                     LOG.info("Creating new promo code for free drink for 10 purchases");
                     promoCodeRepository.createPromoCode(newUserPromoCode);
 

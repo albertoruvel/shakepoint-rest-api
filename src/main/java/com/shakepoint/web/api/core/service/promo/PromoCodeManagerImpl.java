@@ -128,6 +128,32 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         validation.setDiscount(getDiscount(promoCode, product));
         validation.setMessage(message);
         validation.setValid(valid);
+        //calculate new price
+        PromoType type = PromoType.fromValue(promoCode.getType());
+        switch(type){
+            case BIRTHDATE:
+                //any product
+                validation.setNewPrice(0D);
+                break;
+            case EARNED:
+                validation.setNewPrice(product.getPrice() - validation.getDiscount());
+                break;
+            case OPEN:
+                validation.setNewPrice(product.getPrice() - validation.getDiscount());
+                break;
+            case OPEN_ALL:
+                validation.setNewPrice(product.getPrice() - validation.getDiscount());
+                break;
+            case SEASON:
+                validation.setNewPrice(product.getPrice() - validation.getDiscount());
+                break;
+            case SEASON_ALL:
+                validation.setNewPrice(product.getPrice() - validation.getDiscount());
+                break;
+            case TRAINER:
+                validation.setNewPrice(product.getPrice() - validation.getDiscount());
+                break;
+        }
         validation.setNewPrice(promoCode.getProduct().getPrice() - validation.getDiscount());
         return validation;
     }
