@@ -134,6 +134,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                 //get it
                 PromoCode promoCode = promoCodeRepository.findPromoCodeByCode(request.getPromoCode());
                 if (promoCode == null) {
+                    LOG.info("Invalid promo code attempt: " + request.getPromoCode());
                     //promo code is invalid
                     return Response.status(Response.Status.BAD_REQUEST)
                             .entity(new PurchaseQRCode(null, false, "El código de promoción es inválido")).build();
@@ -141,17 +142,21 @@ public class ShopRestServiceImpl implements ShopRestService {
                     //check expiration date for promo code
                     if (promoCodeManager.isPromoCodeExpired(promoCode)) {
                         //expired
+                        LOG.info("Expired promo code: " + promoCode.getCode());
                         return Response.status(Response.Status.BAD_REQUEST)
                                 .entity(new PurchaseQRCode(null, false, "El código de promoción ha expirado")).build();
                     } else {
                         //check if user already redeemed promo code
                         if (promoCodeRepository.isPromoCodeAlreadyRedeemedByUser(promoCode.getCode(), user.getId())) {
+                            LOG.info("Promo code already redeemed by user: " + promoCode.getCode());
                             return Response.status(Response.Status.BAD_REQUEST)
                                     .entity(new PurchaseQRCode(null, false, "El código de promoción ya ha sido canjeado anteriormente")).build();
                         } else {
                             //set new price for purchase
                             purchase.setTotal(calculatePurchaseTotal(purchase.getTotal(), promoCode.getDiscount()));
                             //call pay works to make payment
+                            LOG.info("New price for purchase " + purchase.getProduct().getName() + " to " + purchase.getTotal());
+                            LOG.info("Confirming purchase");
                             return confirmPurchase(purchase, request, user, promoCode);
                         }
                     }
@@ -197,10 +202,11 @@ public class ShopRestServiceImpl implements ShopRestService {
             purchase.setStatus(PurchaseStatus.AUTHORIZED);
             purchase.setReference(paymentDetails.getReference());
             purchaseRepository.update(purchase);
-
+            LOG.info("Updating purchase to CASHED");
             if (user.getRole().equals(SecurityRole.MEMBER.getValue())) {
                 //check how many purchases member has
                 Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
+                LOG.info("Member have purchased " + purchasesCount + " times");
                 if (purchasesCount != 0 && purchasesCount % 10 == 0) {
                     //multiple of 10, means it deserves another drink for 50%
                     //create a new promo code for this unique user
@@ -209,6 +215,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     calendar.add(Calendar.DAY_OF_YEAR, 7);
                     PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
                             "Te has ganado una bebida gratis!", 50, PromoType.EARNED.getValue());
+                    LOG.info("Creating new promo code for free drink for 10 purchases");
                     promoCodeRepository.createPromoCode(newUserPromoCode);
 
                     Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
@@ -230,13 +237,14 @@ public class ShopRestServiceImpl implements ShopRestService {
                 promoCodeRepository.redeemPromoCode(redemption);
                 //send email
                 emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
-
+                LOG.info("Promo code " + promoCode + " have been redeemed");
                 //check if promo code contains a trainer assigned
                 User trainer = promoCode.getTrainer();
                 if (trainer != null) {
                     //check number of redeems for promo code
                     Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
                     if (redemptionsCount % 10 == 0) {
+                        LOG.info("Trainer promo code have been used " + redemptionsCount + " times");
                         //deserves 10% off on next drink
                         //TODO: creates a new promo code
                         //PromoCode trainerPromoCode = promoCodeManager.createPromoCode()
