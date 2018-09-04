@@ -34,8 +34,8 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
     private final Logger log = Logger.getLogger(getClass());
 
     @Override
-    public boolean isPromoCodeExpired(PromoCode promoCode){
-        try{
+    public boolean isPromoCodeExpired(PromoCode promoCode) {
+        try {
             //check expiration date
             Date expirationDate = ShakeUtils.SIMPLE_DATE_FORMAT.parse(promoCode.getExpirationDate());
             //create current date
@@ -44,12 +44,13 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
             long expirationDateTime = expirationDate.getTime();
             long currentDateTime = calendar.getTime().getTime();
 
-            if (expirationDateTime <=  currentDateTime){
+            if (expirationDateTime <= currentDateTime) {
                 //expired
                 return false;
             }
             return true;
-        }catch(Exception ex){
+        } catch (Exception ex) {
+            log.error("Error parsing date");
             return false;
         }
     }
@@ -80,12 +81,12 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
     public PromoCodeValidation validatePromoCode(ValidatePromoCodeRequest request) {
         PromoCode promoCode = promoCodeRepository.findPromoCodeByCode(request.getPromoCode());
         if (promoCode == null) {
-            return new PromoCodeValidation("El código es inválido", false, -1D, 0D);
+            return new PromoCodeValidation("El código es inválido", false, - 1D, 0D);
         } else if (! promoCode.getCode().equals(request.getPromoCode())) {
-            return new PromoCodeValidation("El código no es válido", false, -1D, 0D);
+            return new PromoCodeValidation("El código no es válido", false, - 1D, 0D);
         } else if (isPromoCodeExpired(promoCode)) {
             log.info("Expired promo code " + promoCode.getCode() + "--" + promoCode.getExpirationDate());
-            return new PromoCodeValidation("El código ha expirado", false, -1D, 0D);
+            return new PromoCodeValidation("El código ha expirado", false, - 1D, 0D);
         }
 
         //code is correct
@@ -100,7 +101,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
                     return createValidation("Success", true, promoCode, request.getProductId());
                 } else {
                     // promo code for invalid product
-                    return new PromoCodeValidation("El código no es válido para este producto", false, -1D, 0D);
+                    return new PromoCodeValidation("El código no es válido para este producto", false, - 1D, 0D);
                 }
             case OPEN_ALL:
                 //promo code is valid for any product
@@ -116,13 +117,13 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
                 if (promoCode.getProduct().getId().equals(request.getProductId())) {
                     return createValidation("Success", true, promoCode, request.getProductId());
                 } else {
-                    return new PromoCodeValidation("El código no es válido para este producto", false, -1D, 0D);
+                    return new PromoCodeValidation("El código no es válido para este producto", false, - 1D, 0D);
                 }
             case SEASON_ALL:
                 return createValidation("Success", true, promoCode, request.getProductId());
 
-                default:
-                    return new PromoCodeValidation("El código es inválido", false, -1D, 0D);
+            default:
+                return new PromoCodeValidation("El código es inválido", false, - 1D, 0D);
         }
     }
 
@@ -134,7 +135,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         validation.setValid(valid);
         //calculate new price
         PromoType type = PromoType.fromValue(promoCode.getType());
-        switch(type){
+        switch (type) {
             case BIRTHDATE:
                 //any product
                 validation.setNewPrice(0D);
