@@ -142,7 +142,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     //check expiration date for promo code
                     if (promoCodeManager.isPromoCodeExpired(promoCode)) {
                         //expired
-                        LOG.info("Expired promo code: " + promoCode.getCode());
+                        LOG.info("Expired promo code: " + promoCode.getCode() + "--" + promoCode.getExpirationDate());
                         return Response.status(Response.Status.BAD_REQUEST)
                                 .entity(new PurchaseQRCode(null, false, "El código de promoción ha expirado")).build();
                     } else {
