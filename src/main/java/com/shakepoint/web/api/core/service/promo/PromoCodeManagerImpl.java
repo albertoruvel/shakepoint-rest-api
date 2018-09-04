@@ -40,9 +40,14 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
             Date expirationDate = ShakeUtils.SIMPLE_DATE_FORMAT.parse(promoCode.getExpirationDate());
             //create current date
             Calendar calendar = Calendar.getInstance();
+            Date currentDate = calendar.getTime();
+
+            //format for debug purposes
+            log.info("Expiration Date: " + ShakeUtils.SIMPLE_DATE_FORMAT.format(expirationDate) + "\n" + "Current Date: " + ShakeUtils.SIMPLE_DATE_FORMAT.format(currentDate));
             //get difference between dates
             long expirationDateTime = expirationDate.getTime();
             long currentDateTime = calendar.getTime().getTime();
+
 
             if (expirationDateTime <= currentDateTime) {
                 //expired
