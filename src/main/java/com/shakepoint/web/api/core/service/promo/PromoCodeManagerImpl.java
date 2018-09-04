@@ -12,6 +12,7 @@ import com.shakepoint.web.api.data.entity.PromoCode;
 import com.shakepoint.web.api.data.entity.PromoCodeRedeem;
 import com.shakepoint.web.api.data.entity.PromoType;
 import com.shakepoint.web.api.data.entity.User;
+import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import java.util.Calendar;
@@ -29,6 +30,8 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
 
     @Inject
     private ProductRepository productRepository;
+
+    private final Logger log = Logger.getLogger(getClass());
 
     @Override
     public boolean isPromoCodeExpired(PromoCode promoCode){
@@ -81,6 +84,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         } else if (! promoCode.getCode().equals(request.getPromoCode())) {
             return new PromoCodeValidation("El código no es válido", false, -1D, 0D);
         } else if (isPromoCodeExpired(promoCode)) {
+            log.info("Expired promo code " + promoCode.getCode() + "--" + promoCode.getExpirationDate());
             return new PromoCodeValidation("El código ha expirado", false, -1D, 0D);
         }
 
