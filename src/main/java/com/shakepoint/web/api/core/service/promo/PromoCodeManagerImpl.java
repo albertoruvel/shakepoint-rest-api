@@ -49,7 +49,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
             long currentDateTime = calendar.getTime().getTime();
 
 
-            if (expirationDateTime <= currentDateTime) {
+            if (currentDateTime <= expirationDateTime) {
                 //expired
                 return false;
             }
