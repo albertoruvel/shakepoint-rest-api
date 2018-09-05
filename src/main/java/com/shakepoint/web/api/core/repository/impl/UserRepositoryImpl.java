@@ -347,7 +347,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void createTrainerInformation(TrainerInformation trainerInformation) {
         try{
-            em.persist(trainerInformation);
+            em.merge(trainerInformation);
         }catch(Exception ex){
             log.error("Could not persist trainer information", ex);
         }
