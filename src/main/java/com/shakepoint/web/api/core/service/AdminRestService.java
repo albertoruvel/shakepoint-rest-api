@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.core.service;
 
 import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
+import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -55,4 +56,6 @@ public interface AdminRestService {
     public void createBirthDatePromoCode(String userId);
 
     public Response getAllTrainers();
+
+    public Response createTrainer(CreateTrainerRequest request);
 }

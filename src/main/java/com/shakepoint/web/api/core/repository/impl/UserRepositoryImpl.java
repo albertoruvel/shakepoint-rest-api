@@ -5,6 +5,7 @@ import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
 import com.shakepoint.web.api.data.entity.PartnerTrainer;
+import com.shakepoint.web.api.data.entity.TrainerInformation;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
@@ -339,6 +340,15 @@ public class UserRepositoryImpl implements UserRepository {
                     .executeUpdate();
         } catch (Exception ex) {
             log.error("Could not update user password", ex);
+        }
+    }
+
+    @Override
+    public void createTrainerInformation(TrainerInformation trainerInformation) {
+        try{
+            em.persist(trainerInformation);
+        }catch(Exception ex){
+            log.error("Could not persist trainer information", ex);
         }
     }
 

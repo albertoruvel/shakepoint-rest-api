@@ -16,6 +16,7 @@ import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.core.util.ValidationUtils;
 import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
+import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
@@ -524,6 +525,20 @@ public class AdminRestServiceImpl implements AdminRestService {
             trainersDto.add(TransformationUtils.createTrainer(user.getId(), user.getName(), user.getEmail()));
         });
         return Response.ok(trainersDto).build();
+    }
+
+    @Override
+    public Response createTrainer(CreateTrainerRequest request) {
+        User trainer = TransformationUtils.getUser(request, cryptoService.encrypt(request.getPassword()));
+        //get partner
+        User partner = userRepository.get(request.getPartnerId());
+
+        TrainerInformation trainerInformation = TransformationUtils.createTrainerInformation(trainer, partner);
+        userRepository.createTrainerInformation(trainerInformation);
+
+        //TODO: send welcome email here
+        //TODO: send email to admins ??
+        return Response.ok().build();
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {

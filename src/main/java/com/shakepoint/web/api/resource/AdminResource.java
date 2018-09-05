@@ -5,6 +5,7 @@ import com.shakepoint.web.api.core.service.security.AllowedUsers;
 import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
+import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -181,6 +182,14 @@ public class AdminResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getActivePromos() {
         return adminRestService.getActivePromos();
+    }
+
+    @POST
+    @Path("createTrainer")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createYTrainer(CreateTrainerRequest request) {
+        return adminRestService.createTrainer(request);
+
     }
 }
 

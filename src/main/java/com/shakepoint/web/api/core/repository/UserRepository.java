@@ -7,6 +7,7 @@ package com.shakepoint.web.api.core.repository;
 
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
 import com.shakepoint.web.api.data.entity.PartnerTrainer;
+import com.shakepoint.web.api.data.entity.TrainerInformation;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
@@ -54,4 +55,6 @@ public interface UserRepository {
     void addUserPassword(UserPassword userPassword);
 
     void updateUserPassword(String encryptedPassword, String userId);
+
+    void createTrainerInformation(TrainerInformation trainerInformation);
 }

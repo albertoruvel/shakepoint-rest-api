@@ -27,6 +27,7 @@ import com.shakepoint.web.api.data.entity.Product;
 import com.shakepoint.web.api.data.entity.PromoCode;
 import com.shakepoint.web.api.data.entity.PromoType;
 import com.shakepoint.web.api.data.entity.Purchase;
+import com.shakepoint.web.api.data.entity.TrainerInformation;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserProfile;
 import com.shakepoint.web.api.data.entity.VendingConnection;
@@ -74,6 +75,19 @@ public class TransformationUtils {
         user.setName(request.getName());
         user.setPassword(encryptedPassword);
         user.setRole(SecurityRole.MEMBER.toString());
+        return user;
+    }
+
+    public static User getUser(com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest request, String encryptedPassword) {
+        User user = new User();
+        user.setActive(true);
+        user.setConfirmed(false);
+        user.setAccessToken(ShakeUtils.getNextSessionToken());
+        user.setCreationDate(ShakeUtils.DATE_FORMAT.format(new Date()));
+        user.setEmail(request.getEmail());
+        user.setName(request.getName());
+        user.setPassword(encryptedPassword);
+        user.setRole(SecurityRole.TRAINER.toString());
         return user;
     }
 
@@ -312,5 +326,13 @@ public class TransformationUtils {
 
     public static com.shakepoint.web.api.data.dto.response.partner.Trainer createTrainer(String id, String name, String email) {
         return new com.shakepoint.web.api.data.dto.response.partner.Trainer(id, name, email);
+    }
+
+    public static TrainerInformation createTrainerInformation(User trainer, User partner) {
+        TrainerInformation trainerInformation = new TrainerInformation();
+        trainerInformation.setPartner(partner);
+        trainerInformation.setTrainerUser(trainer);
+        trainerInformation.setRegistrationDate(ShakeUtils.SIMPLE_DATE_FORMAT.format(new Date()));
+        return trainerInformation;
     }
 }
