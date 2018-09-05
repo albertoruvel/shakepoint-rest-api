@@ -17,7 +17,7 @@ public class TrainerInformation {
     @Id
     private String id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "partner_id")
     private User partner;
 
