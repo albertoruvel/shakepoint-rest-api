@@ -532,7 +532,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         User trainer = TransformationUtils.getUser(request, cryptoService.encrypt(request.getPassword()));
         //get partner
         User partner = userRepository.get(request.getPartnerId());
-        userRepository.addShakepointUser(partner);
+        userRepository.addShakepointUser(trainer);
         TrainerInformation trainerInformation = TransformationUtils.createTrainerInformation(trainer, partner);
         userRepository.createTrainerInformation(trainerInformation);
 
