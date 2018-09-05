@@ -330,8 +330,8 @@ public class TransformationUtils {
 
     public static TrainerInformation createTrainerInformation(User trainer, User partner) {
         TrainerInformation trainerInformation = new TrainerInformation();
-        trainerInformation.setPartner(partner);
-        trainerInformation.setTrainerUser(trainer);
+        trainerInformation.setPartner(partner.getId());
+        trainerInformation.setTrainerUser(trainer.getId());
         trainerInformation.setRegistrationDate(ShakeUtils.SIMPLE_DATE_FORMAT.format(new Date()));
         return trainerInformation;
     }

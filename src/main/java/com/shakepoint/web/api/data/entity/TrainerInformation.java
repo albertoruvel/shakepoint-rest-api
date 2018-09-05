@@ -17,13 +17,11 @@ public class TrainerInformation {
     @Id
     private String id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "partner_id")
-    private User partner;
+    @Column(name = "partner_id")
+    private String partner;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
-    private User trainerUser;
+    @Column(name = "user_id")
+    private String trainerUser;
 
     @Column(name = "registration_date")
     private String registrationDate;
@@ -40,19 +38,19 @@ public class TrainerInformation {
         this.id = id;
     }
 
-    public User getPartner() {
+    public String getPartner() {
         return partner;
     }
 
-    public void setPartner(User partner) {
+    public void setPartner(String partner) {
         this.partner = partner;
     }
 
-    public User getTrainerUser() {
+    public String getTrainerUser() {
         return trainerUser;
     }
 
-    public void setTrainerUser(User trainerUser) {
+    public void setTrainerUser(String trainerUser) {
         this.trainerUser = trainerUser;
     }
 
