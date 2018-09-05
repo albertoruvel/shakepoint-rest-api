@@ -1,8 +1,13 @@
 package com.shakepoint.web.api.data.entity;
 
 public enum PromoType {
-    OPEN(2, "Abierto"), OPEN_ALL(1, "Abierto para todos los productos"), TRAINER(3, "Entrenadores"),
-    SEASON(5, "Por temporada"), SEASON_ALL(4, "Por temporada todos"), BIRTHDATE(6, "Cumpleaños"), EARNED(7, "Premio");
+    OPEN(2, "Abierto"),
+    OPEN_ALL(1, "Abierto para todos los productos"),
+    TRAINER(3, "Entrenadores"),
+    SEASON(5, "Por temporada"),
+    SEASON_ALL(4, "Por temporada todos"),
+    BIRTHDATE(6, "Cumpleaños"),
+    EARNED(7, "Premio");
 
     int value;
     String clientValue;

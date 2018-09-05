@@ -19,4 +19,6 @@ public interface PromoCodeRepository {
 
 
     public Integer getPromoCodeRedemptions(String code);
+
+    public Integer getCountForTrainerPromoCode(String code);
 }

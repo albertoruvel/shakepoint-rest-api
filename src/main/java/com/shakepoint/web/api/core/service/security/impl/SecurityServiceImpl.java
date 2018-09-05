@@ -1,9 +1,11 @@
 package com.shakepoint.web.api.core.service.security.impl;
 
 import com.github.roar109.syring.annotation.ApplicationProperty;
+import com.shakepoint.web.api.core.repository.PromoCodeRepository;
 import com.shakepoint.web.api.core.repository.UserRepository;
 import com.shakepoint.web.api.core.service.email.EmailSender;
 import com.shakepoint.web.api.core.service.email.Template;
+import com.shakepoint.web.api.core.service.promo.PromoCodeManager;
 import com.shakepoint.web.api.core.service.security.*;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
@@ -14,6 +16,8 @@ import com.shakepoint.web.api.data.dto.response.AuthenticationResponse;
 import com.shakepoint.web.api.data.dto.response.ForgotPasswordResponse;
 import com.shakepoint.web.api.data.dto.response.ResetPasswordResponse;
 import com.shakepoint.web.api.data.dto.response.ValidateForgotPasswordTokenResponse;
+import com.shakepoint.web.api.data.entity.PromoCode;
+import com.shakepoint.web.api.data.entity.PromoType;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
@@ -21,6 +25,9 @@ import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,6 +55,12 @@ public class SecurityServiceImpl implements SecurityService {
     @Inject
     @ApplicationProperty(name = "com.shakepoint.web.admin.token", type = ApplicationProperty.Types.SYSTEM)
     private String adminToken;
+
+    @Inject
+    private PromoCodeManager promoCodeManager;
+
+    @Inject
+    private PromoCodeRepository promoCodeRepository;
 
     private Logger log = Logger.getLogger(getClass());
 
@@ -116,10 +129,16 @@ public class SecurityServiceImpl implements SecurityService {
             //create user profile
             UserProfile userProfile = new UserProfile();
             //check if logged with facebook
+            final Map<String, Object> parameters = new HashMap<String, Object>(2);
             if (request.getFacebookId() != null && ! request.getFacebookId().isEmpty()) {
                 userProfile.setFacebookId(request.getFacebookId());
+                LocalDate currentDate = LocalDate.now();
+                LocalDate expirationDate = currentDate.plus(1, ChronoUnit.MONTHS);
                 //TODO: create a promo code in here....
-
+                PromoCode promoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SIMPLE_DATE_FORMAT.toPattern())),
+                        "Bienvenido!", 100, PromoType.EARNED.getValue());
+                promoCodeRepository.createPromoCode(promoCode);
+                parameters.put("promoCode", promoCode.getCode());
             }
             userProfile.setBirthday(request.getBirthdate());
             userProfile.setHeight(0);
@@ -131,7 +150,6 @@ public class SecurityServiceImpl implements SecurityService {
             ar.setSuccess(true);
             ar.setRole(SecurityRole.MEMBER.toString());
             //Send Email
-            final Map<String, Object> parameters = new HashMap<String, Object>(1);
             parameters.put("name", user.getName());
             emailSender.sendEmail(request.getEmail(), Template.SIGN_UP, parameters);
             return Response.ok(ar).build();

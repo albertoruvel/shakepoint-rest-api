@@ -22,6 +22,10 @@ import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
 
 public class ShopRestServiceImpl implements ShopRestService {
@@ -85,7 +89,6 @@ public class ShopRestServiceImpl implements ShopRestService {
 
         }
         VendingMachine machine = machines.get(currentIndex);
-        LOG.info(String.format("Got machine %s from distance search", machine.getName()));
         search.setMachineId(machine.getId());
         search.setMachineName(machine.getName());
         search.setDistance(distance);
@@ -152,8 +155,10 @@ public class ShopRestServiceImpl implements ShopRestService {
                             return Response.status(Response.Status.BAD_REQUEST)
                                     .entity(new PurchaseQRCode(null, false, "El código de promoción ya ha sido canjeado anteriormente")).build();
                         } else {
+                            double newTotal = calculatePurchaseTotal(purchase.getTotal(), promoCode.getDiscount());
+                            LOG.info("Will set new total for purchase (before: " + purchase.getTotal() + ", now: " + newTotal + ")");
                             //set new price for purchase
-                            purchase.setTotal(calculatePurchaseTotal(purchase.getTotal(), promoCode.getDiscount()));
+                            purchase.setTotal(newTotal);
                             //call pay works to make payment
                             LOG.info("New price for purchase " + purchase.getProduct().getName() + " to " + purchase.getTotal());
                             LOG.info("Confirming purchase");
@@ -182,8 +187,6 @@ public class ShopRestServiceImpl implements ShopRestService {
     private Response confirmPurchase(Purchase purchase, ConfirmPurchaseRequest request, User user, PromoCode promoCode) {
         final String controlNumber = createControlNumber();
         purchase.setControlNumber(controlNumber);
-        //update purchase
-        purchaseRepository.update(purchase);
         PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber(),
                 request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
         if (paymentDetails == null) {
@@ -202,9 +205,9 @@ public class ShopRestServiceImpl implements ShopRestService {
             purchase.setStatus(PurchaseStatus.AUTHORIZED);
             purchase.setReference(paymentDetails.getReference());
             purchaseRepository.update(purchase);
-            LOG.info("Updating purchase to CASHED");
-            if (user.getRole().equals(SecurityRole.MEMBER.getValue())) {
-                //check how many purchases member has
+            LOG.info("Updated purchase to CASHED");
+            if (user.getRole().equals(SecurityRole.MEMBER.getValue()) || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
+                //check how many purchases member/trainer has
                 Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
                 LOG.info("Member have purchased " + purchasesCount + " times");
                 if (purchasesCount != 0 && purchasesCount % 10 == 0) {
@@ -245,28 +248,35 @@ public class ShopRestServiceImpl implements ShopRestService {
                     Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
                     if (redemptionsCount % 10 == 0) {
                         LOG.info("Trainer promo code have been used " + redemptionsCount + " times");
-                        //deserves 10% off on next drink
-                        //TODO: creates a new promo code
-                        //PromoCode trainerPromoCode = promoCodeManager.createPromoCode()
+                        //deserves free drink
+                        //creates a new promo code
+                        LocalDate currentDate = LocalDate.now();
+                        LocalDate expirationDate = currentDate.plus(1, ChronoUnit.MONTHS);
+                        PromoCode earnedPromoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SIMPLE_DATE_FORMAT.toPattern())),
+                                "Te has ganado una bebida gratis!", 100, PromoType.EARNED.getValue());
+                        promoCodeRepository.createPromoCode(earnedPromoCode);
+                        LOG.info("Created new promo code for free drink for trainer");
                     }
                 }
 
+                LOG.info("Successful purchase with promo code");
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
             } else {
                 //send standard email
                 emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
+                LOG.info("Successful purchase");
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
             }
         } else if (paymentDetails.getPayworksResult().equals("D")) {
             //declined
-            LOG.info("Declined");
+            LOG.info("Purchase have been Rejected Declined");
             return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage()))
                     .build();
         } else if (paymentDetails.getPayworksResult().equals("T")) {
             LOG.info("Timeout on provider");
             return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage())).build();
         } else {
-            LOG.info("Rejected");
+            LOG.info("Purchase have been Rejected");
             return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage())).build();
         }
     }

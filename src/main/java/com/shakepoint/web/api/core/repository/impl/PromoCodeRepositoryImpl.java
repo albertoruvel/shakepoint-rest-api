@@ -72,4 +72,10 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
                 .setParameter("code", code).getSingleResult();
     }
 
+    @Override
+    public Integer getCountForTrainerPromoCode(String code) {
+        return (Integer)em.createQuery("SELECT COUNT(pr.id) FROM PromoRedeem pr WHERE pr.promoCode.code = ?")
+                .setParameter(1, code).getSingleResult();
+    }
+
 }
