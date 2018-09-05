@@ -343,6 +343,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    @Transactional
     @Override
     public void createTrainerInformation(TrainerInformation trainerInformation) {
         try{
