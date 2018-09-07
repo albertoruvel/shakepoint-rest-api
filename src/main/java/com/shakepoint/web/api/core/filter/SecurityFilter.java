@@ -80,7 +80,7 @@ public class SecurityFilter implements ContainerRequestFilter {
         //get user by token
         User user = null;
         try {
-            user = userRepository.findUserByToken(token.split(" ")[1]);
+            user = userRepository.findUserByToken(token);
             if (user != null) {
                 for (SecurityRole role : roles) {
                     if (SecurityRole.ALL == role) {
@@ -99,6 +99,7 @@ public class SecurityFilter implements ContainerRequestFilter {
             }
         } catch (Exception ex) {
             log.error("Error finding user: " + ex.getMessage());
+            ex.printStackTrace();
             return false;
         }
     }
