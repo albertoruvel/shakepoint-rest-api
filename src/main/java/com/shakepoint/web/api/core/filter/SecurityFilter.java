@@ -47,6 +47,7 @@ public class SecurityFilter implements ContainerRequestFilter {
         Method method = methodInvoker.getMethod();
         //get token
         String auth = containerRequestContext.getHeaderString("Authorization");
+        log.info(String.format("Authorization token: %s", auth));
         //check if the incoming request is from the admin token
         if(auth != null && auth.equals(adminToken)){
             //let it pass..
