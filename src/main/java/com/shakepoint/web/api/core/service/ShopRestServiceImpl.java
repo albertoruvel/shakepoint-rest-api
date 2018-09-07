@@ -222,6 +222,9 @@ public class ShopRestServiceImpl implements ShopRestService {
                     promoCodeRepository.createPromoCode(newUserPromoCode);
 
                     Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
+                    earnedDiscountEmailParams.put("username", user.getName());
+                    earnedDiscountEmailParams.put("promoCode", newUserPromoCode.getCode());
+                    earnedDiscountEmailParams.put("discount", newUserPromoCode.getDiscount());
 
                     emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
                 }

@@ -57,6 +57,9 @@ public class PartnerRestServiceImpl implements PartnerRestService {
 
         Map<String, Object> emailParams = new HashMap<>();
         emailParams.put("trainerName", user.getName());
+        emailParams.put("gymName", partner.getName());
+        emailParams.put("email", user.getEmail());
+        emailParams.put("pass", request.getPassword());
         emailParams.put("token", user.getAccessToken());
 
         //send email to trainer with welcome and confirmation link

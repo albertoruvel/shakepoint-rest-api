@@ -423,8 +423,6 @@ public class AdminRestServiceImpl implements AdminRestService {
                         emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
                     }
                 });
-
-        //TODO; send push notification later here....
         return Response.ok(new CreatePromoCodeResponse("Promo code have been created")).build();
     }
 
