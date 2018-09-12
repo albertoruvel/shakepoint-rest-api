@@ -70,6 +70,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         promoCodeEntity.setDescription(description);
         promoCodeEntity.setDiscount(discount);
         promoCodeEntity.setType(promotionType);
+        promoCodeEntity.setActive(Boolean.TRUE);
         return promoCodeEntity;
     }
 
