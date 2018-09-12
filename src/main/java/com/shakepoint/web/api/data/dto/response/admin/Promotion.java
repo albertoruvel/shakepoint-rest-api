@@ -10,8 +10,9 @@ public class Promotion {
     private String type;
     private String code;
     private Trainer trainer;
+    private String description;
 
-    public Promotion(String id, String expirationDate, SimpleProduct product, int discount, String type, String code, Trainer trainer) {
+    public Promotion(String id, String expirationDate, SimpleProduct product, int discount, String type, String code, Trainer trainer, String description) {
         this.id = id;
         this.expirationDate = expirationDate;
         this.product = product;
@@ -19,6 +20,7 @@ public class Promotion {
         this.type = type;
         this.code = code;
         this.trainer = trainer;
+        this.description = description;
     }
 
     public Promotion() {
@@ -78,5 +80,13 @@ public class Promotion {
 
     public void setTrainer(Trainer trainer) {
         this.trainer = trainer;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

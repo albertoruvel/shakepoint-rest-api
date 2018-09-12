@@ -296,10 +296,10 @@ public class TransformationUtils {
     public static Promotion createPromoCode(PromoCode promo, Product product, Trainer trainer) {
         if (product != null) {
             return new Promotion(promo.getId(), promo.getExpirationDate(), createSimpleProduct(product), promo.getDiscount(),
-                    PromoType.fromValue(promo.getType()).toString(), promo.getCode(), trainer);
+                    PromoType.fromValue(promo.getType()).toString(), promo.getCode(), trainer, promo.getDescription());
         } else {
             return new Promotion(promo.getId(), promo.getExpirationDate(), null, promo.getDiscount(),
-                    PromoType.fromValue(promo.getType()).toString(), promo.getCode(), trainer);
+                    PromoType.fromValue(promo.getType()).toString(), promo.getCode(), trainer, promo.getDescription());
         }
     }
 
@@ -312,6 +312,7 @@ public class TransformationUtils {
             newPromotion.setDiscount(promotion.getDiscount());
             newPromotion.setExpirationDate(promotion.getExpirationDate());
             newPromotion.setType(PromoType.fromValue(promotion.getType()).toString());
+            newPromotion.setDescription(promotion.getDescription());
             SimpleProduct simpleProduct = null;
             if (promotion.getProduct() != null) {
                 //add product details
