@@ -33,6 +33,9 @@ public class PromoCode {
     @JoinColumn(name = "trainer_id")
     private User trainer;
 
+    @Column(name = "active")
+    private Boolean active;
+
     public PromoCode() {
         this.id = UUID.randomUUID().toString();
     }
@@ -99,5 +102,13 @@ public class PromoCode {
 
     public void setTrainer(User trainer) {
         this.trainer = trainer;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

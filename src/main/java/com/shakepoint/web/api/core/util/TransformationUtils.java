@@ -303,6 +303,30 @@ public class TransformationUtils {
         }
     }
 
+    public static List<Promotion> createPromoCodes(List<PromoCode> promoCodes) {
+        final List<Promotion> promotions = new ArrayList();
+        promoCodes.stream().forEach(promotion -> {
+            Promotion newPromotion = new Promotion();
+            newPromotion.setId(promotion.getId());
+            newPromotion.setCode(promotion.getCode());
+            newPromotion.setDiscount(promotion.getDiscount());
+            newPromotion.setExpirationDate(promotion.getExpirationDate());
+            newPromotion.setType(PromoType.fromValue(promotion.getType()).toString());
+            SimpleProduct simpleProduct = null;
+            if (promotion.getProduct() != null) {
+                //add product details
+                simpleProduct = createSimpleProduct(promotion.getProduct());
+                newPromotion.setProduct(simpleProduct);
+            }
+            if (promotion.getTrainer() != null) {
+                newPromotion.setTrainer(new com.shakepoint.web.api.data.dto.response.partner.Trainer(
+                        promotion.getTrainer().getId(), promotion.getTrainer().getName(), promotion.getTrainer().getEmail()
+                ));
+            }
+        });
+        return promotions;
+    }
+
     public static User createUserFromTrainerRequest(CreateTrainerRequest request, String newToken, CryptoService cryptoService) {
         User user = new User();
         user.setPassword(cryptoService.encrypt(request.getPassword()));

@@ -21,4 +21,10 @@ public interface PromoCodeRepository {
     public Integer getPromoCodeRedemptions(String code);
 
     public Integer getCountForTrainerPromoCode(String code);
+
+    public List<PromoCode> getTrainerPromoCodes(String trainerId);
+
+    public PromoCode getById(String promoCodeId);
+
+    public void update(PromoCode promoCode);
 }

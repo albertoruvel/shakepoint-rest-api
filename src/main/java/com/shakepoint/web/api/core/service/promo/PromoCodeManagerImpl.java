@@ -90,8 +90,9 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         } else if (! promoCode.getCode().equals(request.getPromoCode())) {
             return new PromoCodeValidation("El código no es válido", false, - 1D, 0D);
         } else if (isPromoCodeExpired(promoCode)) {
-            log.info("Expired promo code " + promoCode.getCode() + "--" + promoCode.getExpirationDate());
             return new PromoCodeValidation("El código ha expirado", false, - 1D, 0D);
+        } else if (! promoCode.isActive()) {
+            return new PromoCodeValidation("El código no se encuentra activo", false, -1D, 0D);
         }
 
         //code is correct
@@ -112,6 +113,10 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
                 //promo code is valid for any product
                 return createValidation("Success", true, promoCode, request.getProductId());
             case TRAINER:
+                if (authenticatedUser.getId().equals(promoCode.getTrainer().getId())) {
+                    //trainer is trying to use his own code!!
+                    return new PromoCodeValidation("No es posible canjear un código asignado a este usuario", false, -1D, 0D);
+                }
                 //promo code is valid for any product
                 return createValidation("Success", true, promoCode, request.getProductId());
             case BIRTHDATE:

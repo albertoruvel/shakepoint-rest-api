@@ -8,6 +8,7 @@ import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
+import com.shakepoint.web.api.data.dto.request.admin.TogglePromoCodeStatusRequest;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.inject.Inject;
@@ -189,7 +190,14 @@ public class AdminResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createYTrainer(CreateTrainerRequest request) {
         return adminRestService.createTrainer(request);
+    }
 
+    @POST
+    @Path("togglePromoCodeStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response togglePromoCodeStatus(TogglePromoCodeStatusRequest request) {
+        return adminRestService.togglePromoCodeStatus(request);
     }
 }
 

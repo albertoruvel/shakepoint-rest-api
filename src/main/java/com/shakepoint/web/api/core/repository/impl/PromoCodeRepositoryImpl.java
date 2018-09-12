@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
 
 @Stateless
@@ -49,19 +51,19 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
     public void redeemPromoCode(PromoCodeRedeem redemption) {
         try {
             em.persist(redemption);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             logger.error("Could not persist promo code redemption", ex);
         }
     }
 
     @Override
     public boolean isPromoCodeAlreadyRedeemedByUser(String code, String id) {
-        try{
+        try {
             PromoCodeRedeem redemption = (PromoCodeRedeem) em.createQuery("SELECT r FROM PromoRedeem r WHERE r.promoCode.code = :code AND r.user.id = :userId")
                     .setParameter("code", code)
                     .setParameter("userId", id).getSingleResult();
             return true;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -74,8 +76,40 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
 
     @Override
     public Integer getCountForTrainerPromoCode(String code) {
-        return (Integer)em.createQuery("SELECT COUNT(pr.id) FROM PromoRedeem pr WHERE pr.promoCode.code = ?")
+        return (Integer) em.createQuery("SELECT COUNT(pr.id) FROM PromoRedeem pr WHERE pr.promoCode.code = ?")
                 .setParameter(1, code).getSingleResult();
+    }
+
+    @Override
+    public List<PromoCode> getTrainerPromoCodes(String trainerId) {
+        try {
+            return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId")
+                    .setParameter("trainerId", trainerId).getResultList();
+        } catch (Exception ex) {
+            logger.error("Could not get trainer promo codes", ex);
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public PromoCode getById(String promoCodeId) {
+        try {
+            return (PromoCode) em.createQuery("SELECT p FROM Promo p WHERE p.id = :id")
+                    .setParameter("id", promoCodeId).getSingleResult();
+        } catch(Exception ex){
+            logger.error("Could not find promo code", ex);
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void update(PromoCode promoCode) {
+        try{
+            em.merge(promoCode);
+        }catch(Exception ex){
+            logger.error("Could not merge promo code", ex);
+        }
     }
 
 }

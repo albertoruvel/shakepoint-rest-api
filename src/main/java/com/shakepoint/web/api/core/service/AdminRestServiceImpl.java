@@ -20,6 +20,7 @@ import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
+import com.shakepoint.web.api.data.dto.request.admin.TogglePromoCodeStatusRequest;
 import com.shakepoint.web.api.data.dto.response.SimpleMachineProduct;
 import com.shakepoint.web.api.data.dto.response.admin.AdminIndexContent;
 import com.shakepoint.web.api.data.dto.response.admin.CreatePromoCodeResponse;
@@ -537,6 +538,19 @@ public class AdminRestServiceImpl implements AdminRestService {
         //TODO: send welcome email here
         //TODO: send email to admins ??
         return Response.ok().build();
+    }
+
+    @Override
+    public Response togglePromoCodeStatus(TogglePromoCodeStatusRequest request) {
+        //get promo code
+        PromoCode promoCode = promoCodeRepository.getById(request.getPromoCodeId());
+        if (promoCode != null) {
+            promoCode.setActive(request.isActive());
+            promoCodeRepository.update(promoCode);
+            return Response.ok().build();
+        } else{
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {

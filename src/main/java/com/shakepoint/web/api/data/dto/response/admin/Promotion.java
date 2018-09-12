@@ -21,6 +21,9 @@ public class Promotion {
         this.trainer = trainer;
     }
 
+    public Promotion() {
+    }
+
     public String getId() {
         return id;
     }

@@ -1,0 +1,33 @@
+package com.shakepoint.web.api.core.service;
+
+import com.shakepoint.web.api.core.repository.PromoCodeRepository;
+import com.shakepoint.web.api.core.repository.UserRepository;
+import com.shakepoint.web.api.core.service.security.AuthenticatedUser;
+import com.shakepoint.web.api.core.service.security.RequestPrincipal;
+import com.shakepoint.web.api.core.util.TransformationUtils;
+import com.shakepoint.web.api.data.entity.PromoCode;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import java.util.List;
+
+public class TrainerRestServiceImpl implements TrainerRestService {
+
+    @Inject
+    private PromoCodeRepository promoCodeRepository;
+
+    @Inject
+    private UserRepository userRepository;
+
+    @Inject
+    @AuthenticatedUser
+    private RequestPrincipal authenticatedUser;
+
+    @Override
+    public Response getTrainerAssignedPromos() {
+        //get all promo codes for user
+        List<PromoCode> promoCodes = promoCodeRepository.getTrainerPromoCodes(authenticatedUser.getId());
+
+        return Response.ok(TransformationUtils.createPromoCodes(promoCodes)).build();
+    }
+}

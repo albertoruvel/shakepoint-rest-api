@@ -4,6 +4,7 @@ import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
+import com.shakepoint.web.api.data.dto.request.admin.TogglePromoCodeStatusRequest;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.ws.rs.core.Response;
@@ -58,4 +59,6 @@ public interface AdminRestService {
     public Response getAllTrainers();
 
     public Response createTrainer(CreateTrainerRequest request);
+
+    public Response togglePromoCodeStatus(TogglePromoCodeStatusRequest request);
 }
