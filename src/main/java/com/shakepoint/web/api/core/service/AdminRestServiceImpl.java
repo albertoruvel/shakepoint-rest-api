@@ -504,7 +504,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         calendar.add(Calendar.MONTH, 1);
 
         //create promo code
-        PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
+        PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(calendar.getTime()),
                 "Mes del cumpleañero!", 100, PromoType.BIRTHDATE.getValue());
         //this promo code includes any free drink
         promoCodeRepository.createPromoCode(promoCode);

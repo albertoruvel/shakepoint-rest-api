@@ -216,7 +216,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(new Date());
                     calendar.add(Calendar.DAY_OF_YEAR, 7);
-                    PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SIMPLE_DATE_FORMAT.format(calendar.getTime()),
+                    PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(calendar.getTime()),
                             "Te has ganado un descuento!", 50, PromoType.EARNED.getValue());
                     LOG.info("Creating new promo code for free drink for 10 purchases");
                     promoCodeRepository.createPromoCode(newUserPromoCode);
@@ -255,7 +255,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                         //creates a new promo code
                         LocalDate currentDate = LocalDate.now();
                         LocalDate expirationDate = currentDate.plus(1, ChronoUnit.MONTHS);
-                        PromoCode earnedPromoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SIMPLE_DATE_FORMAT.toPattern())),
+                        PromoCode earnedPromoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.toPattern())),
                                 "Te has ganado una bebida gratis!", 100, PromoType.EARNED.getValue());
                         promoCodeRepository.createPromoCode(earnedPromoCode);
                         LOG.info("Created new promo code for free drink for trainer");

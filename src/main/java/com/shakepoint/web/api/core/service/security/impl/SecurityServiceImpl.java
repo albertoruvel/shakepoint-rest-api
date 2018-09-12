@@ -134,7 +134,7 @@ public class SecurityServiceImpl implements SecurityService {
                 userProfile.setFacebookId(request.getFacebookId());
                 LocalDate currentDate = LocalDate.now();
                 LocalDate expirationDate = currentDate.plus(1, ChronoUnit.MONTHS);
-                PromoCode promoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SIMPLE_DATE_FORMAT.toPattern())),
+                PromoCode promoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.toPattern())),
                         "Bienvenido!", 100, PromoType.EARNED.getValue());
                 promoCodeRepository.createPromoCode(promoCode);
                 Logger.getLogger(getClass()).info("Created promo code for new user");

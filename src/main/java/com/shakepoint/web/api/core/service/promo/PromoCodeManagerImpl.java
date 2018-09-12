@@ -37,13 +37,13 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
     public boolean isPromoCodeExpired(PromoCode promoCode) {
         try {
             //check expiration date
-            Date expirationDate = ShakeUtils.SIMPLE_DATE_FORMAT.parse(promoCode.getExpirationDate());
+            Date expirationDate = ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.parse(promoCode.getExpirationDate());
             //create current date
             Calendar calendar = Calendar.getInstance();
             Date currentDate = calendar.getTime();
 
             //format for debug purposes
-            log.info("Expiration Date: " + ShakeUtils.SIMPLE_DATE_FORMAT.format(expirationDate) + "\n" + "Current Date: " + ShakeUtils.SIMPLE_DATE_FORMAT.format(currentDate));
+            log.info("Expiration Date: " + ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(expirationDate) + "\n" + "Current Date: " + ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(currentDate));
             //get difference between dates
             long expirationDateTime = expirationDate.getTime();
             long currentDateTime = calendar.getTime().getTime();
@@ -78,7 +78,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         PromoCodeRedeem redeem = new PromoCodeRedeem();
         redeem.setPromoCode(promoCode);
         redeem.setUser(user);
-        redeem.setRedemptionDate(ShakeUtils.DATE_FORMAT.format(new Date()));
+        redeem.setRedemptionDate(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(new Date()));
         return redeem;
     }
 
