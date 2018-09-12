@@ -32,7 +32,8 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
 
     @Override
     public List<PromoCode> getAllPromoCodes() {
-        return em.createQuery("SELECT p FROM Promo p")
+        return em.createQuery("SELECT p FROM Promo p WHERE p.active = :status")
+                .setParameter("status", Boolean.TRUE)
                 .getResultList();
     }
 
@@ -83,7 +84,8 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
     @Override
     public List<PromoCode> getTrainerPromoCodes(String trainerId) {
         try {
-            return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId")
+            return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId AND p.active = :status")
+                    .setParameter("status", Boolean.TRUE)
                     .setParameter("trainerId", trainerId).getResultList();
         } catch (Exception ex) {
             logger.error("Could not get trainer promo codes", ex);
