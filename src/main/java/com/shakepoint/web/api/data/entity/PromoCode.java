@@ -34,7 +34,8 @@ public class PromoCode {
     private User trainer;
 
     @Column(name = "active")
-    private Boolean active;
+    @Enumerated(EnumType.ORDINAL)
+    private PromoCodeStatus status;
 
     public PromoCode() {
         this.id = UUID.randomUUID().toString();
@@ -104,11 +105,11 @@ public class PromoCode {
         this.trainer = trainer;
     }
 
-    public Boolean isActive() {
-        return active;
+    public PromoCodeStatus getStatus() {
+        return status;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setStatus(PromoCodeStatus status) {
+        this.status = status;
     }
 }

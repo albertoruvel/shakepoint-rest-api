@@ -3,6 +3,7 @@ package com.shakepoint.web.api.core.repository.impl;
 import com.shakepoint.web.api.core.repository.PromoCodeRepository;
 import com.shakepoint.web.api.data.entity.PromoCode;
 import com.shakepoint.web.api.data.entity.PromoCodeRedeem;
+import com.shakepoint.web.api.data.entity.PromoCodeStatus;
 import com.shakepoint.web.api.data.entity.User;
 import org.apache.log4j.Logger;
 
@@ -85,7 +86,7 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
     public List<PromoCode> getTrainerPromoCodes(String trainerId) {
         try {
             return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId AND p.active = :status")
-                    .setParameter("status", Boolean.TRUE)
+                    .setParameter("status", PromoCodeStatus.ACTIVE.getValue())
                     .setParameter("trainerId", trainerId).getResultList();
         } catch (Exception ex) {
             logger.error("Could not get trainer promo codes", ex);

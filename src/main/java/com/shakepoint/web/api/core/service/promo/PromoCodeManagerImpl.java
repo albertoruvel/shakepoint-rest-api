@@ -10,6 +10,7 @@ import com.shakepoint.web.api.data.dto.response.PromoCodeValidation;
 import com.shakepoint.web.api.data.entity.Product;
 import com.shakepoint.web.api.data.entity.PromoCode;
 import com.shakepoint.web.api.data.entity.PromoCodeRedeem;
+import com.shakepoint.web.api.data.entity.PromoCodeStatus;
 import com.shakepoint.web.api.data.entity.PromoType;
 import com.shakepoint.web.api.data.entity.User;
 import org.apache.log4j.Logger;
@@ -70,7 +71,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         promoCodeEntity.setDescription(description);
         promoCodeEntity.setDiscount(discount);
         promoCodeEntity.setType(promotionType);
-        promoCodeEntity.setActive(Boolean.TRUE);
+        promoCodeEntity.setStatus(PromoCodeStatus.ACTIVE);
         return promoCodeEntity;
     }
 
@@ -92,7 +93,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
             return new PromoCodeValidation("El código no es válido", false, - 1D, 0D);
         } else if (isPromoCodeExpired(promoCode)) {
             return new PromoCodeValidation("El código ha expirado", false, - 1D, 0D);
-        } else if (! promoCode.isActive()) {
+        } else if (promoCode.getStatus() == PromoCodeStatus.INACTIVE) {
             return new PromoCodeValidation("El código no se encuentra activo", false, -1D, 0D);
         }
 

@@ -545,7 +545,11 @@ public class AdminRestServiceImpl implements AdminRestService {
         //get promo code
         PromoCode promoCode = promoCodeRepository.getById(request.getPromoCodeId());
         if (promoCode != null) {
-            promoCode.setActive(request.isActive());
+            if (request.isActive()) {
+                promoCode.setStatus(PromoCodeStatus.ACTIVE);
+            } else {
+                promoCode.setStatus(PromoCodeStatus.INACTIVE);
+            }
             promoCodeRepository.update(promoCode);
             return Response.ok().build();
         } else{
