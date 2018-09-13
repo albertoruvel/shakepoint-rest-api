@@ -86,7 +86,7 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
     public List<PromoCode> getTrainerPromoCodes(String trainerId) {
         try {
             return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId AND p.status = :status")
-                    .setParameter("status", PromoCodeStatus.ACTIVE.getValue())
+                    .setParameter("status", PromoCodeStatus.ACTIVE)
                     .setParameter("trainerId", trainerId).getResultList();
         } catch (Exception ex) {
             logger.error("Could not get trainer promo codes", ex);
