@@ -324,6 +324,7 @@ public class TransformationUtils {
                         promotion.getTrainer().getId(), promotion.getTrainer().getName(), promotion.getTrainer().getEmail()
                 ));
             }
+            promotions.add(newPromotion);
         });
         return promotions;
     }
