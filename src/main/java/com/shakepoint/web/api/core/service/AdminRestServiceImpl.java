@@ -520,9 +520,7 @@ public class AdminRestServiceImpl implements AdminRestService {
     public Response getAllTrainers() {
         List<User> trainers = userRepository.getTrainers();
         List<Trainer> trainersDto = new ArrayList<>();
-        trainers.stream().forEach(user -> {
-            trainersDto.add(TransformationUtils.createTrainer(user.getId(), user.getName(), user.getEmail()));
-        });
+        trainers.stream().forEach(user -> trainersDto.add(TransformationUtils.createTrainer(user.getId(), user.getName(), user.getEmail())));
         return Response.ok(trainersDto).build();
     }
 
@@ -546,9 +544,9 @@ public class AdminRestServiceImpl implements AdminRestService {
         PromoCode promoCode = promoCodeRepository.getById(request.getPromoCodeId());
         if (promoCode != null) {
             if (request.isActive()) {
-                promoCode.setStatus(PromoCodeStatus.ACTIVE);
+                promoCode.setStatus(PromoCodeStatus.ACTIVE.getValue());
             } else {
-                promoCode.setStatus(PromoCodeStatus.INACTIVE);
+                promoCode.setStatus(PromoCodeStatus.INACTIVE.getValue());
             }
             promoCodeRepository.update(promoCode);
             return Response.ok().build();

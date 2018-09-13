@@ -71,7 +71,7 @@ public class PromoCodeManagerImpl implements PromoCodeManager {
         promoCodeEntity.setDescription(description);
         promoCodeEntity.setDiscount(discount);
         promoCodeEntity.setType(promotionType);
-        promoCodeEntity.setStatus(PromoCodeStatus.ACTIVE);
+        promoCodeEntity.setStatus(1);
         return promoCodeEntity;
     }
 

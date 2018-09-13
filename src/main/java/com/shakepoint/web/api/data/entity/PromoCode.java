@@ -34,8 +34,7 @@ public class PromoCode {
     private User trainer;
 
     @Column(name = "active")
-    @Enumerated(EnumType.ORDINAL)
-    private PromoCodeStatus status;
+    private Integer status;
 
     public PromoCode() {
         this.id = UUID.randomUUID().toString();
@@ -106,10 +105,10 @@ public class PromoCode {
     }
 
     public PromoCodeStatus getStatus() {
-        return status;
+        return PromoCodeStatus.fromValue(this.status);
     }
 
-    public void setStatus(PromoCodeStatus status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 }
