@@ -30,7 +30,7 @@ public class TrainerRestServiceImpl implements TrainerRestService {
     public Response getTrainerAssignedPromos() {
         //get all promo codes for user
         List<PromoCode> promoCodes = promoCodeRepository.getTrainerPromoCodes(authenticatedUser.getId());
-        log.info(String.format("Got %d promo codes for trainer"));
+        log.info(String.format("Got %d promo codes for trainer", promoCodes.size()));
         return Response.ok(TransformationUtils.createPromoCodes(promoCodes)).build();
     }
 }
