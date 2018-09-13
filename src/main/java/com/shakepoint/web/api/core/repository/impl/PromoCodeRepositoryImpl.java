@@ -85,7 +85,7 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
     @Override
     public List<PromoCode> getTrainerPromoCodes(String trainerId) {
         try {
-            return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId AND p.active = :status")
+            return em.createQuery("SELECT p FROM Promo p WHERE p.trainer.id = :trainerId AND p.status = :status")
                     .setParameter("status", PromoCodeStatus.ACTIVE.getValue())
                     .setParameter("trainerId", trainerId).getResultList();
         } catch (Exception ex) {
