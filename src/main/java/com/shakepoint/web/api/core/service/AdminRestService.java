@@ -61,4 +61,6 @@ public interface AdminRestService {
     public Response createTrainer(CreateTrainerRequest request);
 
     public Response togglePromoCodeStatus(TogglePromoCodeStatusRequest request);
+
+    public Response deactivatePromoCode(String promoId);
 }

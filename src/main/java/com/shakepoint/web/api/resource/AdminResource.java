@@ -199,5 +199,13 @@ public class AdminResource {
     public Response togglePromoCodeStatus(TogglePromoCodeStatusRequest request) {
         return adminRestService.togglePromoCodeStatus(request);
     }
+
+    @POST
+    @Path("deactivatePromoCode")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deactivatePromoCode(@QueryParam("promoCodeId")String promoId) {
+        return adminRestService.deactivatePromoCode(promoId);
+    }
 }
 

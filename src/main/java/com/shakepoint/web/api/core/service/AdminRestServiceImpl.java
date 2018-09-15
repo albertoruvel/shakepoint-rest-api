@@ -555,6 +555,20 @@ public class AdminRestServiceImpl implements AdminRestService {
         }
     }
 
+    @Override
+    public Response deactivatePromoCode(String promoId) {
+        //get promo code
+        PromoCode promoCode = promoCodeRepository.getById(promoId);
+        if (promoCode == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        promoCode.setStatus(PromoCodeStatus.INACTIVE.getValue());
+        promoCodeRepository.update(promoCode);
+
+        return Response.ok().build();
+    }
+
     void processFile(MultipartFormDataInput file, final String productId) {
         try (InputStream is = file.getFormDataPart("file", InputStream.class, null)) {
             byte[] bytes = IOUtils.toByteArray(is);
