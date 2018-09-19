@@ -133,7 +133,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     .build();
         } else {
             //get promo code if exists
-            if (request.getPromoCode() != null && !request.getPromoCode().isEmpty()) {
+            if (request.getPromoCode() != null && ! request.getPromoCode().isEmpty()) {
                 //get it
                 PromoCode promoCode = promoCodeRepository.findPromoCodeByCode(request.getPromoCode());
                 if (promoCode == null) {
@@ -261,6 +261,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                         LOG.info("Created new promo code for free drink for trainer");
                     }
                 }
+
 
                 LOG.info("Successful purchase with promo code");
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();

@@ -154,7 +154,11 @@ public class AdminRestServiceImpl implements AdminRestService {
         User user = TransformationUtils.getUserFromTechnician(dto, cryptoService.encrypt(dto.getPassword()));
         //add the new technician
         try {
-             userRepository.addShakepointUser(user);
+            userRepository.addShakepointUser(user);
+            //send email
+            Map<String, Object> params = new HashMap<String, Object> ();
+            params.put("pass", dto.getPassword());
+            emailSender.sendEmail(user.getEmail(), Template.NEW_PARTNER_WELCOME, params);
             return Response.ok().build();
         } catch (Exception ex) {
             log.error("Could not add technician: " + ex.getMessage());
@@ -328,7 +332,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         //create range dates
         final Date toDate = calendar.getTime();
 
-        calendar.add(Calendar.DAY_OF_YEAR, -7);
+        calendar.add(Calendar.DAY_OF_YEAR, - 7);
         final Date fromDate = calendar.getTime();
         //create a range array
         String[] range = ShakeUtils.getDateRange(fromDate, toDate);
@@ -398,7 +402,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         Product product;
         User trainer;
         //check if any product id
-        if (request.getProductId() != null && !request.getProductId().isEmpty()) {
+        if (request.getProductId() != null && ! request.getProductId().isEmpty()) {
             product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
         }
@@ -438,7 +442,7 @@ public class AdminRestServiceImpl implements AdminRestService {
                 Trainer trainer = null;
                 if (promo.getProduct() != null) {
                     product = productRepository.getProduct(promo.getProduct().getId());
-                } else if (promo.getTrainer() != null){
+                } else if (promo.getTrainer() != null) {
                     trainer = TransformationUtils.createTrainer(promo.getTrainer().getId(),
                             promo.getTrainer().getName(), promo.getTrainer().getEmail());
                 }
@@ -446,7 +450,7 @@ public class AdminRestServiceImpl implements AdminRestService {
             });
             return Response.ok(promos).build();
         } catch (Exception ex) {
-             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
     }
@@ -468,11 +472,11 @@ public class AdminRestServiceImpl implements AdminRestService {
         }
 
         PromoCode promoCode = promoCodeManager.createPromoCode(request.getExpirationDate(), request.getDescription(), request.getDiscount(), PromoType.TRAINER.getValue());
-        if (request.getProductId() != null && !request.getProductId().isEmpty()) {
+        if (request.getProductId() != null && ! request.getProductId().isEmpty()) {
             Product product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
         }
-        if (request.getTrainerId() != null && !request.getTrainerId().isEmpty()) {
+        if (request.getTrainerId() != null && ! request.getTrainerId().isEmpty()) {
             //fetch trainer and set it
             User trainer = userRepository.get(request.getTrainerId());
             promoCode.setTrainer(trainer);
@@ -533,8 +537,11 @@ public class AdminRestServiceImpl implements AdminRestService {
         TrainerInformation trainerInformation = TransformationUtils.createTrainerInformation(trainer, partner);
         userRepository.createTrainerInformation(trainerInformation);
 
-        //TODO: send welcome email here
-        //TODO: send email to admins ??
+        Map<String, Object> emailParams = new HashMap<String, Object>();
+        emailParams.put("name", trainer.getName());
+        emailParams.put("gymName", partner.getName());
+        emailParams.put("pass", request.getPassword());
+        emailSender.sendEmail(trainerInformation.getId(), Template.NEW_TRAINER, emailParams);
         return Response.ok().build();
     }
 
@@ -550,7 +557,7 @@ public class AdminRestServiceImpl implements AdminRestService {
             }
             promoCodeRepository.update(promoCode);
             return Response.ok().build();
-        } else{
+        } else {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
