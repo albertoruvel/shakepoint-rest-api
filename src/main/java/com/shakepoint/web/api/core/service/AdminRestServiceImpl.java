@@ -476,25 +476,18 @@ public class AdminRestServiceImpl implements AdminRestService {
             Product product = productRepository.getProduct(request.getProductId());
             promoCode.setProduct(product);
         }
+        Map<String, Object> emailParams = new HashMap<>();
+        emailParams.put("promocode", promoCode.getCode());
         if (request.getTrainerId() != null && ! request.getTrainerId().isEmpty()) {
             //fetch trainer and set it
             User trainer = userRepository.get(request.getTrainerId());
+            emailParams.put("username", trainer.getName());
             promoCode.setTrainer(trainer);
+            //send email to trainer
+            emailSender.sendEmail(trainer.getEmail(),  Template.TRAINER_PROMO_CODE_CREATED, emailParams);
         }
         //persist promo code
         promoCodeRepository.createPromoCode(promoCode);
-        //send email to all trainers
-        List<User> users = userRepository.getUsers();
-        Map<String, Object> emailParams = new HashMap<>();
-        emailParams.put("promocode", promoCode.getCode());
-        users.stream().forEach(user -> {
-            if (user.getRole().equals(SecurityRole.TRAINER.getValue())) {
-                //send email with promo code
-                emailParams.put("username", user.getName());
-                emailSender.sendEmail(user.getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
-            }
-        });
-
         return Response.ok(new CreatePromoCodeResponse("Promo code have been created")).build();
     }
 
