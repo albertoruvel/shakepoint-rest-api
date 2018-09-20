@@ -162,8 +162,6 @@ public class SecurityServiceImpl implements SecurityService {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ForgotPasswordResponse("No email was provided")).build();
         }
-        //get user by email
-        log.info(email + " forgot password request");
         User user = userRepository.getUserByEmail(email);
         if (user == null) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -198,9 +196,6 @@ public class SecurityServiceImpl implements SecurityService {
         emailParams.put("forgotPasswordToken", userPassword.getToken());
         emailParams.put("userName", user.getName());
 
-        log.info(user.getEmail());
-        log.info(userPassword.getToken());
-        log.info(user.getEmail());
         emailSender.sendEmail(user.getEmail(), Template.FORGOT_PASSWORD_REQUEST, emailParams);
 
         return Response.ok(new ForgotPasswordResponse("La petición se ha enviado correctamente")).build();
@@ -247,7 +242,7 @@ public class SecurityServiceImpl implements SecurityService {
             final String encryptedPassword = cryptoService.encrypt(resetPasswordRequest.getNewPassword());
             userRepository.updateUserPassword(encryptedPassword, userPassword.getUserId());
 
-            //TODO: send email here!!!
+            emailSender.sendEmail(userRepository.get(userPassword.getUserId()).getEmail(), Template.PASSWORD_RESET_SUCCESS, null);
             return Response.ok(new ResetPasswordResponse("La contraseña ha sido cambiada exitosamente")).build();
         }
     }
