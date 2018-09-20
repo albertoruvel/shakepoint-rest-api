@@ -193,11 +193,14 @@ public class SecurityServiceImpl implements SecurityService {
             userRepository.updateUserPassword(userPassword);
         }
 
-        log.info("will send forgot password token to user");
         //send an email
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("forgotPasswordToken", userPassword.getToken());
         emailParams.put("userName", user.getName());
+
+        log.info(user.getEmail());
+        log.info(userPassword.getToken());
+        log.info(user.getEmail());
         emailSender.sendEmail(user.getEmail(), Template.FORGOT_PASSWORD_REQUEST, emailParams);
 
         return Response.ok(new ForgotPasswordResponse("La petición se ha enviado correctamente")).build();
