@@ -154,6 +154,9 @@ public class AdminRestServiceImpl implements AdminRestService {
         User user = TransformationUtils.getUserFromTechnician(dto, cryptoService.encrypt(dto.getPassword()));
         //add the new technician
         try {
+            if (userRepository.getUserByEmail(dto.getEmail()) != null) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
             userRepository.addShakepointUser(user);
             //send email
             Map<String, Object> params = new HashMap<String, Object> ();
@@ -524,6 +527,9 @@ public class AdminRestServiceImpl implements AdminRestService {
     @Override
     public Response createTrainer(CreateTrainerRequest request) {
         User trainer = TransformationUtils.getUser(request, cryptoService.encrypt(request.getPassword()));
+        if (userRepository.getUserByEmail(request.getEmail()) != null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         //get partner
         User partner = userRepository.get(request.getPartnerId());
         userRepository.addShakepointUser(trainer);
