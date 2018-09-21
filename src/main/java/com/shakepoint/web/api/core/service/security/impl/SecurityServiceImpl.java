@@ -195,7 +195,6 @@ public class SecurityServiceImpl implements SecurityService {
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("forgotPasswordToken", userPassword.getToken());
         emailParams.put("userName", user.getName());
-        log.info(String.format("User token: %s, userName: %s, email: %s", userPassword.getToken(), user.getName(), user.getEmail()));
         emailSender.sendEmail(user.getEmail(), Template.FORGOT_PASSWORD_REQUEST, emailParams);
 
         return Response.ok(new ForgotPasswordResponse("La petición se ha enviado correctamente")).build();
