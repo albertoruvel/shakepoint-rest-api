@@ -422,15 +422,21 @@ public class AdminRestServiceImpl implements AdminRestService {
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("promoCode", promoCode.getCode());
 
-        users.stream()
-                .forEach(user -> {
-                    if (user.getRole().equals(SecurityRole.MEMBER.getValue())
-                            || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
-                        //send email
-                        emailParams.put("username", user.getName());
-                        emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
-                    }
-                });
+        if (promoCode.getType() == PromoType.TRAINER.getValue()) {
+            //send email only to trainer
+            emailParams.put("username", promoCode.getTrainer().getName());
+            emailSender.sendEmail(promoCode.getTrainer().getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+        } else {
+            users.stream()
+                    .forEach(user -> {
+                        if (user.getRole().equals(SecurityRole.MEMBER.getValue())
+                                || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
+                            //send email
+                            emailParams.put("username", user.getName());
+                            emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
+                        }
+                    });
+        }
         return Response.ok(new CreatePromoCodeResponse("Promo code have been created")).build();
     }
 

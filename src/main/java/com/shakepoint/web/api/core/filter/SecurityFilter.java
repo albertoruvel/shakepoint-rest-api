@@ -48,7 +48,7 @@ public class SecurityFilter implements ContainerRequestFilter {
         //get token
         String auth = containerRequestContext.getHeaderString("Authorization");
         //check if the incoming request is from the admin token
-        if(auth != null && auth.equals(adminToken)){
+        if (auth != null && auth.equals(adminToken)) {
             //let it pass..
             userAuthenticatedEvent.fire("admin");
             return;
@@ -65,11 +65,9 @@ public class SecurityFilter implements ContainerRequestFilter {
     private void validate(AllowedUsers annotation, String token, ContainerRequestContext crc) {
         SecurityRole[] allowedRoles = annotation.securityRoles();
         //validate token
-        if (token == null || token.isEmpty()) //no token content
-        {
+        if (token == null || token.isEmpty()) {
             abort(crc);
-        } else if (!validateToken(allowedRoles, token)) //token have not been successfully validated
-        {
+        } else if (!validateToken(allowedRoles, token)) {
             abort(crc);
         }
 
@@ -85,8 +83,7 @@ public class SecurityFilter implements ContainerRequestFilter {
                     if (SecurityRole.ALL == role) {
                         userAuthenticatedEvent.fire(user.getId());
                         return true;
-                    }
-                    else if (SecurityRole.fromString(user.getRole()) == role) {
+                    } else if (SecurityRole.fromString(user.getRole()) == role) {
                         //user authenticated
                         userAuthenticatedEvent.fire(user.getId());
                         return true;
