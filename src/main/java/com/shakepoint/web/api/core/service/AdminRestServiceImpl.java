@@ -425,6 +425,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         if (promoCode.getType() == PromoType.TRAINER.getValue()) {
             //send email only to trainer
             emailParams.put("username", promoCode.getTrainer().getName());
+            emailParams.put("promocode", promoCode.getCode());
             emailSender.sendEmail(promoCode.getTrainer().getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
         } else {
             users.stream()
