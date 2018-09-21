@@ -34,22 +34,18 @@ public class EmailSenderImpl implements EmailSender {
     @ApplicationProperty(name = "com.shakepoint.web.email.enabled", type = ApplicationProperty.Types.SYSTEM)
     private String emailEnabled;
 
-    public void sendEmail(final String emailAsJson){
+    public void sendEmail(final String emailAsJson) {
         if (Boolean.parseBoolean(emailEnabled)) {
             jmsHandler.send(EmailQueue.NAME, emailAsJson);
-        }else{
+        } else {
             log.info("Sending emails is disabled in standalone");
         }
     }
 
     protected void sendEmail(String to, String subject, String templateName, Map<String, Object> params) {
-        if(params == null)
+        if (params == null)
             params = Collections.EMPTY_MAP;
-
         final String emailAsJson = new Email(to, templateName, subject, params).toJson();
-
-        log.info("Sending email to "+to);
-
         new EmailSenderThread(emailAsJson, this);
     }
 
