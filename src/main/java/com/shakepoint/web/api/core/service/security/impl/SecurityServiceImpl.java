@@ -3,6 +3,7 @@ package com.shakepoint.web.api.core.service.security.impl;
 import com.github.roar109.syring.annotation.ApplicationProperty;
 import com.shakepoint.web.api.core.repository.PromoCodeRepository;
 import com.shakepoint.web.api.core.repository.UserRepository;
+import com.shakepoint.web.api.core.service.email.EmailAsyncSender;
 import com.shakepoint.web.api.core.service.email.EmailSender;
 import com.shakepoint.web.api.core.service.email.Template;
 import com.shakepoint.web.api.core.service.promo.PromoCodeManager;
@@ -42,7 +43,7 @@ public class SecurityServiceImpl implements SecurityService {
     private CryptoService cryptoService;
 
     @Inject
-    private EmailSender emailSender;
+    private EmailAsyncSender emailSender;
 
     @Inject
     @ApplicationProperty(name = "com.shakepoint.web.admin.user", type = ApplicationProperty.Types.SYSTEM)
