@@ -3,6 +3,7 @@ package com.shakepoint.web.api.core.machine;
 public enum PurchaseStatus {
     PRE_AUTH(199),
     AUTHORIZED(69),
+    CANCELLED(99),
     CASHED(999);
 
 
