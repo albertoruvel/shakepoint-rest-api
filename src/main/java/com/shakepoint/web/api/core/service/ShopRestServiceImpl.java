@@ -300,7 +300,11 @@ public class ShopRestServiceImpl implements ShopRestService {
             //send standard email
             emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
             LOG.info("Successful purchase");
-            return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+            if (paymentDetails != null) {
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+            } else {
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, "Compra procesada con éxito")).build();
+            }
         }
     }
 
