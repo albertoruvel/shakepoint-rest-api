@@ -187,9 +187,12 @@ public class ShopRestServiceImpl implements ShopRestService {
     private Response confirmPurchase(Purchase purchase, ConfirmPurchaseRequest request, User user, PromoCode promoCode) {
         final String controlNumber = createControlNumber();
         purchase.setControlNumber(controlNumber);
+        if (purchase.getTotal() == 0) {
+            //free purchase, no need to call api to make purchase
+            return processSuccessfulDrink(purchase, user, null, promoCode);
+        }
         //replace spaces on card number
         final String cardNumber = request.getCardNumber().replaceAll(" ", "");
-        LOG.info(cardNumber);
         PaymentDetails paymentDetails = payWorksClientService.authorizePayment(cardNumber,
                 request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
         if (paymentDetails == null) {
@@ -198,82 +201,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                     .entity(new PurchaseQRCode(null, false, "Ha ocurrido un problema al realizar el pago, intenta nuevamente"))
                     .build();
         } else if (paymentDetails.getAuthCode() != null && paymentDetails.getPayworksResult().equals("A")) {
-            //check if purchase already contains a qr code
-            if (purchase.getQrCodeUrl() == null) {
-                //try to retry upload for purchase
-                jmsHandler.send(RETRY_UPLOAD_QUEUE_NAME, purchase.getId());
-            }
-            //payment went well
-            purchase.setUser(user);
-            purchase.setStatus(PurchaseStatus.AUTHORIZED);
-            purchase.setReference(paymentDetails.getReference());
-            purchaseRepository.update(purchase);
-            LOG.info("Updated purchase to CASHED");
-            if (user.getRole().equals(SecurityRole.MEMBER.getValue()) || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
-                //check how many purchases member/trainer has
-                Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
-                LOG.info("Member have purchased " + purchasesCount + " times");
-                if (purchasesCount != 0 && purchasesCount % 10 == 0) {
-                    //multiple of 10, means it deserves another drink for 50%
-                    //create a new promo code for this unique user
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.DAY_OF_YEAR, 7);
-                    PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(calendar.getTime()),
-                            "Te has ganado un descuento!", 50, PromoType.EARNED.getValue());
-                    LOG.info("Creating new promo code for free drink for 10 purchases");
-                    promoCodeRepository.createPromoCode(newUserPromoCode);
-
-                    Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
-                    earnedDiscountEmailParams.put("username", user.getName());
-                    earnedDiscountEmailParams.put("promoCode", newUserPromoCode.getCode());
-                    earnedDiscountEmailParams.put("discount", newUserPromoCode.getDiscount());
-
-                    emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
-                }
-            }
-
-            Map<String, Object> emailParams = new HashMap<String, Object>();
-            emailParams.put("productName", purchase.getProduct().getName());
-
-            if (promoCode != null) {
-                emailParams.put("promoCode", promoCode.getCode());
-                emailParams.put("promoDescription", promoCode.getDescription());
-                //means user used promo code to pay this product
-                //create promo code redemption
-                PromoCodeRedeem redemption = promoCodeManager.createPromoCodeRedemption(promoCode, user);
-                //add to database
-                promoCodeRepository.redeemPromoCode(redemption);
-                //send email
-                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
-                LOG.info("Promo code " + promoCode + " have been redeemed");
-                //check if promo code contains a trainer assigned
-                User trainer = promoCode.getTrainer();
-                if (trainer != null) {
-                    //check number of redeems for promo code
-                    Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
-                    if (redemptionsCount % 10 == 0) {
-                        LOG.info("Trainer promo code have been used " + redemptionsCount + " times");
-                        //deserves free drink
-                        //creates a new promo code
-                        LocalDate currentDate = LocalDate.now();
-                        LocalDate expirationDate = currentDate.plus(1, ChronoUnit.MONTHS);
-                        PromoCode earnedPromoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.toPattern())),
-                                "Te has ganado una bebida gratis!", 100, PromoType.EARNED.getValue());
-                        promoCodeRepository.createPromoCode(earnedPromoCode);
-                        LOG.info("Created new promo code for free drink for trainer");
-                    }
-                }
-
-
-                LOG.info("Successful purchase with promo code");
-                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
-            } else {
-                //send standard email
-                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
-                LOG.info("Successful purchase");
-                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
-            }
+            return processSuccessfulDrink(purchase, user, paymentDetails, promoCode);
         } else if (paymentDetails.getPayworksResult().equals("D")) {
             //declined
             LOG.info("Purchase have been Rejected Declined");
@@ -285,6 +213,89 @@ public class ShopRestServiceImpl implements ShopRestService {
         } else {
             LOG.info("Purchase have been Rejected");
             return Response.ok(new PurchaseQRCode(null, false, paymentDetails.getComputedMessage())).build();
+        }
+    }
+
+    private Response processSuccessfulDrink(Purchase purchase, User user, PaymentDetails paymentDetails, PromoCode promoCode){
+        //check if purchase already contains a qr code
+        if (purchase.getQrCodeUrl() == null) {
+            //try to retry upload for purchase
+            jmsHandler.send(RETRY_UPLOAD_QUEUE_NAME, purchase.getId());
+        }
+        //payment went well
+        purchase.setUser(user);
+        purchase.setStatus(PurchaseStatus.AUTHORIZED);
+        if (paymentDetails == null) {
+            purchase.setReference("TEST_REFERENCE");
+        } else {
+            purchase.setReference(paymentDetails.getReference());
+        }
+        purchaseRepository.update(purchase);
+        LOG.info("Updated purchase to CASHED");
+        if (user.getRole().equals(SecurityRole.MEMBER.getValue()) || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
+            //check how many purchases member/trainer has
+            Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
+            LOG.info("Member have purchased " + purchasesCount + " times");
+            if (purchasesCount != 0 && purchasesCount % 10 == 0) {
+                //multiple of 10, means it deserves another drink for 50%
+                //create a new promo code for this unique user
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(new Date());
+                calendar.add(Calendar.DAY_OF_YEAR, 7);
+                PromoCode newUserPromoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(calendar.getTime()),
+                        "Te has ganado un descuento!", 50, PromoType.EARNED.getValue());
+                LOG.info("Creating new promo code for free drink for 10 purchases");
+                promoCodeRepository.createPromoCode(newUserPromoCode);
+
+                Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
+                earnedDiscountEmailParams.put("username", user.getName());
+                earnedDiscountEmailParams.put("promoCode", newUserPromoCode.getCode());
+                earnedDiscountEmailParams.put("discount", newUserPromoCode.getDiscount());
+
+                emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
+            }
+        }
+
+        Map<String, Object> emailParams = new HashMap<String, Object>();
+        emailParams.put("productName", purchase.getProduct().getName());
+
+        if (promoCode != null) {
+            emailParams.put("promoCode", promoCode.getCode());
+            emailParams.put("promoDescription", promoCode.getDescription());
+            //means user used promo code to pay this product
+            //create promo code redemption
+            PromoCodeRedeem redemption = promoCodeManager.createPromoCodeRedemption(promoCode, user);
+            //add to database
+            promoCodeRepository.redeemPromoCode(redemption);
+            //send email
+            emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
+            LOG.info("Promo code " + promoCode + " have been redeemed");
+            //check if promo code contains a trainer assigned
+            User trainer = promoCode.getTrainer();
+            if (trainer != null) {
+                //check number of redeems for promo code
+                Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
+                if (redemptionsCount % 10 == 0) {
+                    LOG.info("Trainer promo code have been used " + redemptionsCount + " times");
+                    //deserves free drink
+                    //creates a new promo code
+                    LocalDate currentDate = LocalDate.now();
+                    LocalDate expirationDate = currentDate.plus(1, ChronoUnit.MONTHS);
+                    PromoCode earnedPromoCode = promoCodeManager.createPromoCode(expirationDate.format(DateTimeFormatter.ofPattern(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.toPattern())),
+                            "Te has ganado una bebida gratis!", 100, PromoType.EARNED.getValue());
+                    promoCodeRepository.createPromoCode(earnedPromoCode);
+                    LOG.info("Created new promo code for free drink for trainer");
+                }
+            }
+
+
+            LOG.info("Successful purchase with promo code");
+            return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+        } else {
+            //send standard email
+            emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
+            LOG.info("Successful purchase");
+            return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
         }
     }
 
