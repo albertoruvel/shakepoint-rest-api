@@ -226,6 +226,7 @@ public class ShopRestServiceImpl implements ShopRestService {
         purchase.setUser(user);
         purchase.setStatus(PurchaseStatus.AUTHORIZED);
         if (paymentDetails == null) {
+            LOG.info("Will process purchase for free drink");
             purchase.setReference("TEST_REFERENCE");
         } else {
             purchase.setReference(paymentDetails.getReference());
@@ -269,7 +270,7 @@ public class ShopRestServiceImpl implements ShopRestService {
             promoCodeRepository.redeemPromoCode(redemption);
             //send email
             emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
-            LOG.info("Promo code " + promoCode + " have been redeemed");
+            LOG.info("Promo code " + promoCode.getCode() + " have been redeemed");
             //check if promo code contains a trainer assigned
             User trainer = promoCode.getTrainer();
             if (trainer != null) {
@@ -290,7 +291,11 @@ public class ShopRestServiceImpl implements ShopRestService {
 
 
             LOG.info("Successful purchase with promo code");
-            return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+            if (paymentDetails != null) {
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
+            } else {
+                return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, "Compra procesada con éxito")).build();
+            }
         } else {
             //send standard email
             emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
