@@ -187,11 +187,8 @@ public class ShopRestServiceImpl implements ShopRestService {
     private Response confirmPurchase(Purchase purchase, ConfirmPurchaseRequest request, User user, PromoCode promoCode) {
         final String controlNumber = createControlNumber();
         purchase.setControlNumber(controlNumber);
-        PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber(),
+        PaymentDetails paymentDetails = payWorksClientService.authorizePayment(request.getCardNumber().replaceAll(" ", ""),
                 request.getCardExpirationDate(), request.getCvv(), purchase.getTotal(), purchase.getControlNumber());
-        LOG.info(request.getCardNumber());
-        LOG.info(request.getCardExpirationDate());
-        LOG.info(request.getCvv());
         if (paymentDetails == null) {
             LOG.info("No payment details from pay works");
             return Response.status(Response.Status.BAD_REQUEST)
