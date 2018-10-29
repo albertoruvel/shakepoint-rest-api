@@ -15,6 +15,7 @@ import com.shakepoint.web.api.core.shop.PayWorksMode;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.core.util.ValidationUtils;
+import com.shakepoint.web.api.data.dto.request.admin.CreateFlavorRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
@@ -159,7 +160,7 @@ public class AdminRestServiceImpl implements AdminRestService {
             }
             userRepository.addShakepointUser(user);
             //send email
-            Map<String, Object> params = new HashMap<String, Object> ();
+            Map<String, Object> params = new HashMap<String, Object>();
             params.put("pass", dto.getPassword());
             emailSender.sendEmail(user.getEmail(), Template.NEW_PARTNER_WELCOME, params);
             return Response.ok().build();
@@ -494,7 +495,7 @@ public class AdminRestServiceImpl implements AdminRestService {
             emailParams.put("username", trainer.getName());
             promoCode.setTrainer(trainer);
             //send email to trainer
-            emailSender.sendEmail(trainer.getEmail(),  Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+            emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
         }
         //persist promo code
         promoCodeRepository.createPromoCode(promoCode);
@@ -580,6 +581,49 @@ public class AdminRestServiceImpl implements AdminRestService {
         promoCodeRepository.update(promoCode);
 
         return Response.ok().build();
+    }
+
+    @Override
+    public void createTrainersDailyPromoCode() {
+        //get all trainers
+        List<User> trainers = userRepository.getTrainers();
+        trainers.stream().forEach(trainer -> {
+            PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(new Date()), "Promoción sugerida", 10, PromoType.TRAINER.getValue());
+            //expires last promo code
+            //get promo codes that are not expired or cancelled and cancel them
+            List<PromoCode> promoCodes = promoCodeRepository.getTrainerPromoCodes(trainer.getId());
+            promoCodes.stream().forEach(promo -> promoCodeRepository.cancelPromotion(promo));
+
+            //create new one
+            promoCodeRepository.createPromoCode(promoCode);
+
+            Map<String, Object> parameters = new HashMap<String, Object>();
+            emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_DAILY_PROMO, parameters);
+        });
+    }
+
+    @Override
+    public Response createFlavor(CreateFlavorRequest request) {
+        if (request.getName() == null || request.getName().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } else if (request.getHexColor() == null || request.getHexColor().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        //create a new flavor
+        Flavor flavor = new Flavor();
+        flavor.setName(request.getName());
+        flavor.setHexColor(request.getHexColor());
+
+        productRepository.createNewFlavor(flavor);
+
+        return Response.ok().build();
+
+    }
+
+    @Override
+    public Response getFlavors() {
+        List<Flavor> flavors = productRepository.getFlavors();
+        return Response.ok(flavors).build();
     }
 
     void processFile(MultipartFormDataInput file, final String productId) {

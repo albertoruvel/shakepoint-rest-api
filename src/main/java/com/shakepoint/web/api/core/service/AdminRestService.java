@@ -1,5 +1,6 @@
 package com.shakepoint.web.api.core.service;
 
+import com.shakepoint.web.api.data.dto.request.admin.CreateFlavorRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
@@ -63,4 +64,10 @@ public interface AdminRestService {
     public Response togglePromoCodeStatus(TogglePromoCodeStatusRequest request);
 
     public Response deactivatePromoCode(String promoId);
+
+    public void createTrainersDailyPromoCode();
+
+    public Response createFlavor(CreateFlavorRequest request);
+
+    public Response getFlavors();
 }

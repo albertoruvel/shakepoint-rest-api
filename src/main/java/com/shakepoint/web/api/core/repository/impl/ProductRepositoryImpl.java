@@ -8,6 +8,7 @@ package com.shakepoint.web.api.core.repository.impl;
 
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.repository.ProductRepository;
+import com.shakepoint.web.api.data.entity.Flavor;
 import com.shakepoint.web.api.data.entity.Product;
 import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 import org.apache.log4j.Logger;
@@ -15,6 +16,7 @@ import org.apache.log4j.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,6 +81,21 @@ public class ProductRepositoryImpl implements ProductRepository {
             log.error("Could not get products", ex);
             return null;
         }
+    }
+
+    @Override
+    @Transactional
+    public void createNewFlavor(Flavor flavor) {
+        try {
+            em.persist(flavor);
+        } catch (Exception ex) {
+            log.error("Could not persist flavor entity", ex);
+        }
+    }
+
+    @Override
+    public List<Flavor> getFlavors() {
+        return em.createQuery("SELECT f FROM Flavor f").getResultList();
     }
 
     @Override

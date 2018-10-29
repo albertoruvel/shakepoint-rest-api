@@ -217,11 +217,6 @@ public class ShopRestServiceImpl implements ShopRestService {
     }
 
     private Response processSuccessfulDrink(Purchase purchase, User user, PaymentDetails paymentDetails, PromoCode promoCode){
-        //check if purchase already contains a qr code
-        if (purchase.getQrCodeUrl() == null) {
-            //try to retry upload for purchase
-            jmsHandler.send(RETRY_UPLOAD_QUEUE_NAME, purchase.getId());
-        }
         //payment went well
         purchase.setUser(user);
         purchase.setStatus(PurchaseStatus.AUTHORIZED);
@@ -275,6 +270,8 @@ public class ShopRestServiceImpl implements ShopRestService {
             User trainer = promoCode.getTrainer();
             if (trainer != null) {
                 //check number of redeems for promo code
+                //TODO: GET ALL PROMO CODES THAT THIS USER HAVE REGISTERED WITH PURCHASES INSTEAD OF GETTING TOTAL NUMBER OF TIMES A SINGLE PROMO CODE HAVE BEEN REDEEMED.....
+                //TODO: STUPID CODE GOES HERE..... DON'T FORGET IT
                 Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
                 if (redemptionsCount % 10 == 0) {
                     LOG.info("Trainer promo code have been used " + redemptionsCount + " times");

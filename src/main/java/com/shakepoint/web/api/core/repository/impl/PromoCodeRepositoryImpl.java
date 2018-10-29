@@ -115,4 +115,12 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
         }
     }
 
+    @Override
+    @Transactional
+    public void cancelPromotion(PromoCode promo) {
+        em.createQuery("UPDATE Promo SET status = :status WHERE id = :id")
+                .setParameter("status", PromoCodeStatus.CANCELLED.getValue())
+                .setParameter("id", promo.getId()).executeUpdate();
+    }
+
 }

@@ -7,7 +7,7 @@ public enum PromoType {
     SEASON(5, "Por temporada"),
     SEASON_ALL(4, "Por temporada todos"),
     BIRTHDATE(6, "Cumpleaños"),
-    EARNED(7, "Premio");
+    EARNED(7, "Premio"),;
 
     int value;
     String clientValue;

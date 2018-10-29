@@ -1,7 +1,7 @@
 package com.shakepoint.web.api.data.entity;
 
 public enum PromoCodeStatus {
-    ACTIVE(1), INACTIVE(0);
+    ACTIVE(1), INACTIVE(0), CANCELLED(2);
     int value;
     PromoCodeStatus(int value){
         this.value = value;
@@ -13,6 +13,8 @@ public enum PromoCodeStatus {
                 return INACTIVE;
             case 1:
                 return ACTIVE;
+            case 2:
+                return CANCELLED;
             default:
                 return null;
         }

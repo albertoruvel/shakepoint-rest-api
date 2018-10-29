@@ -7,6 +7,7 @@ package com.shakepoint.web.api.core.repository;
 
 
 import com.shakepoint.web.api.core.machine.ProductType;
+import com.shakepoint.web.api.data.entity.Flavor;
 import com.shakepoint.web.api.data.entity.Product;
 import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 
@@ -18,4 +19,8 @@ public interface ProductRepository {
     public List<VendingMachineProductStatus> getMachineProducts(String machineId);
     public Product getProduct(String id);
 	public List<Product> getProducts(String machineId, ProductType simple);
+
+    public void createNewFlavor(Flavor flavor);
+
+    public List<Flavor> getFlavors();
 }

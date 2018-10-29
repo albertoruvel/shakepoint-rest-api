@@ -13,6 +13,7 @@ public enum Template {
     NEW_PARTNER_ORDER_REQUEST_CLIENT("new_partner_order", "Petición Shakepoint"),
     FORGOT_PASSWORD_REQUEST("forgot_password_request", "Reestablecer contraseña"),
     NEW_PARTNER_ORDER_REQUEST_ADMIN("new_partner_order_admin", "Solicitud Shakepoint"),
+    TRAINER_DAILY_PROMO("trainer_daily_promo", "Promoción sugerida"),
     PASSWORD_RESET_SUCCESS("password_reset_success", "Reseteo de contraseña");
 
     Template(final String templateName, final String subject ){

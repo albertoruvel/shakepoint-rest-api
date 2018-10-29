@@ -4,6 +4,7 @@ import com.shakepoint.web.api.core.service.AdminRestService;
 import com.shakepoint.web.api.core.service.security.AllowedUsers;
 import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
+import com.shakepoint.web.api.data.dto.request.admin.CreateFlavorRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.request.admin.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewMachineRequest;
@@ -207,5 +208,21 @@ public class AdminResource {
     public Response deactivatePromoCode(@QueryParam("promoCodeId")String promoId) {
         return adminRestService.deactivatePromoCode(promoId);
     }
+
+    @POST
+    @Path("createFlavor")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createFlavor(CreateFlavorRequest request) {
+        return adminRestService.createFlavor(request);
+    }
+
+    @GET
+    @Path("getFlavors")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFlavors() {
+        return adminRestService.getFlavors();
+    }
+
 }
 

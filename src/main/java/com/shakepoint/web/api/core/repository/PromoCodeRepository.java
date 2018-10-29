@@ -27,4 +27,6 @@ public interface PromoCodeRepository {
     public PromoCode getById(String promoCodeId);
 
     public void update(PromoCode promoCode);
+
+    public void cancelPromotion(PromoCode promo);
 }
