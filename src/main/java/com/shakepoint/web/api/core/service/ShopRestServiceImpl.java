@@ -232,11 +232,9 @@ public class ShopRestServiceImpl implements ShopRestService {
             purchase.setReference(paymentDetails.getReference());
         }
         purchaseRepository.update(purchase);
-        LOG.info("Updated purchase to CASHED");
         if (user.getRole().equals(SecurityRole.MEMBER.getValue()) || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
             //check how many purchases member/trainer has
             Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
-            LOG.info("Member have purchased " + purchasesCount + " times");
             if (purchasesCount != 0 && purchasesCount % 10 == 0) {
                 //multiple of 10, means it deserves another drink for 50%
                 //create a new promo code for this unique user
@@ -259,7 +257,7 @@ public class ShopRestServiceImpl implements ShopRestService {
 
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("productName", purchase.getProduct().getName());
-
+        emailParams.put("productPrice", purchase.getTotal());
         if (promoCode != null) {
             emailParams.put("promoCode", promoCode.getCode());
             emailParams.put("promoDescription", promoCode.getDescription());
@@ -270,14 +268,12 @@ public class ShopRestServiceImpl implements ShopRestService {
             promoCodeRepository.redeemPromoCode(redemption);
             //send email
             emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
-            LOG.info("Promo code " + promoCode.getCode() + " have been redeemed");
             //check if promo code contains a trainer assigned
             User trainer = promoCode.getTrainer();
             if (trainer != null) {
                 //check number of redeems for promo code
                 Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
                 if (redemptionsCount % 10 == 0) {
-                    LOG.info("Trainer promo code have been used " + redemptionsCount + " times");
                     //deserves free drink
                     //creates a new promo code
                     LocalDate currentDate = LocalDate.now();
