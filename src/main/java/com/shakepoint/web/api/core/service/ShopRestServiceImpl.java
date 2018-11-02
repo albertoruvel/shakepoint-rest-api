@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -258,6 +259,7 @@ public class ShopRestServiceImpl implements ShopRestService {
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("productName", purchase.getProduct().getName());
         emailParams.put("productPrice", purchase.getTotal());
+        emailParams.put("purchaseDate", formatCompletePurchaseDate(purchase.getPurchaseDate()));
         if (promoCode != null) {
             emailParams.put("promoCode", promoCode.getCode());
             emailParams.put("promoDescription", promoCode.getDescription());
@@ -301,6 +303,65 @@ public class ShopRestServiceImpl implements ShopRestService {
             } else {
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, "Compra procesada con éxito")).build();
             }
+        }
+    }
+
+    private String formatCompletePurchaseDate(String purchaseDate) {
+        try{
+            Date date = ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.parse(purchaseDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            //get days
+            int days = calendar.get(Calendar.DAY_OF_MONTH);
+            int months = calendar.get(Calendar.MONTH);
+            int year = calendar.get(Calendar.YEAR);
+            StringBuilder sb = new StringBuilder();
+            sb.append(days);
+            sb.append(" de ");
+            switch(months) {
+                case 0:
+                    sb.append("Enero");
+                    break;
+                case 1:
+                    sb.append("Febrero");
+                    break;
+                case 2:
+                    sb.append("Marzo");
+                    break;
+                case 3:
+                    sb.append("Abril");
+                    break;
+                case 4:
+                    sb.append("Mayo");
+                    break;
+                case 5:
+                    sb.append("Junio");
+                    break;
+                case 6:
+                    sb.append("Julio");
+                    break;
+                case 7:
+                    sb.append("Agosto");
+                    break;
+                case 8:
+                    sb.append("Septiembre");
+                    break;
+                case 9:
+                    sb.append("Octubre");
+                    break;
+                case 10:
+                    sb.append("Noviembre");
+                    break;
+                case 11:
+                    sb.append("Diciembre");
+                    break;
+            }
+            sb.append(" del ");
+            sb.append(year);
+
+            return sb.toString();
+        } catch (ParseException ex) {
+            return null;
         }
     }
 
