@@ -543,6 +543,14 @@ public class AdminRestServiceImpl implements AdminRestService {
         TrainerInformation trainerInformation = TransformationUtils.createTrainerInformation(trainer, partner);
         userRepository.createTrainerInformation(trainerInformation);
 
+        UserProfile userProfile = new UserProfile();
+        userProfile.setBirthday("N/A");
+        userProfile.setHeight(0);
+        userProfile.setUser(trainer);
+        userProfile.setWeight(0);
+        userProfile.setFacebookId(null);
+        userRepository.saveProfile(userProfile);
+
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("name", trainer.getName());
         emailParams.put("gymName", partner.getName());
