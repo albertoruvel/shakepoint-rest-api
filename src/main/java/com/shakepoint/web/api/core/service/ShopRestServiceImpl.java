@@ -385,7 +385,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                 profile = TransformationUtils.createUserProfile(userProfile, purchasesTotal);
             }
         } catch (Exception ex) {
-
+            LOG.error("Could not fetch user profile", ex);
         }
         return Response.ok(profile).build();
     }
