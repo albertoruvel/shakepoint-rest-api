@@ -5,6 +5,7 @@ public class CreateTrainerRequest {
     private String name;
     private String email;
     private String password;
+    private String birthDate;
 
     public String getPartnerId() {
         return partnerId;
@@ -36,5 +37,13 @@ public class CreateTrainerRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
     }
 }
