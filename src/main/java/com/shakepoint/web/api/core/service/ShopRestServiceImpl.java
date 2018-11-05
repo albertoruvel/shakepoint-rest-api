@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -227,11 +228,9 @@ public class ShopRestServiceImpl implements ShopRestService {
             purchase.setReference(paymentDetails.getReference());
         }
         purchaseRepository.update(purchase);
-        LOG.info("Updated purchase to CASHED");
         if (user.getRole().equals(SecurityRole.MEMBER.getValue()) || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
             //check how many purchases member/trainer has
             Integer purchasesCount = purchaseRepository.getUserPurchases(user.getId()).size();
-            LOG.info("Member have purchased " + purchasesCount + " times");
             if (purchasesCount != 0 && purchasesCount % 10 == 0) {
                 //multiple of 10, means it deserves another drink for 50%
                 //create a new promo code for this unique user
@@ -254,7 +253,8 @@ public class ShopRestServiceImpl implements ShopRestService {
 
         Map<String, Object> emailParams = new HashMap<String, Object>();
         emailParams.put("productName", purchase.getProduct().getName());
-
+        emailParams.put("productPrice", purchase.getTotal());
+        emailParams.put("purchaseDate", formatCompletePurchaseDate(purchase.getPurchaseDate()));
         if (promoCode != null) {
             emailParams.put("promoCode", promoCode.getCode());
             emailParams.put("promoDescription", promoCode.getDescription());
@@ -265,7 +265,6 @@ public class ShopRestServiceImpl implements ShopRestService {
             promoCodeRepository.redeemPromoCode(redemption);
             //send email
             emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
-            LOG.info("Promo code " + promoCode.getCode() + " have been redeemed");
             //check if promo code contains a trainer assigned
             User trainer = promoCode.getTrainer();
             if (trainer != null) {
@@ -274,7 +273,6 @@ public class ShopRestServiceImpl implements ShopRestService {
                 //TODO: STUPID CODE GOES HERE..... DON'T FORGET IT
                 Integer redemptionsCount = promoCodeRepository.getPromoCodeRedemptions(promoCode.getCode());
                 if (redemptionsCount % 10 == 0) {
-                    LOG.info("Trainer promo code have been used " + redemptionsCount + " times");
                     //deserves free drink
                     //creates a new promo code
                     LocalDate currentDate = LocalDate.now();
@@ -305,6 +303,65 @@ public class ShopRestServiceImpl implements ShopRestService {
         }
     }
 
+    private String formatCompletePurchaseDate(String purchaseDate) {
+        try{
+            Date date = ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.parse(purchaseDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            //get days
+            int days = calendar.get(Calendar.DAY_OF_MONTH);
+            int months = calendar.get(Calendar.MONTH);
+            int year = calendar.get(Calendar.YEAR);
+            StringBuilder sb = new StringBuilder();
+            sb.append(days);
+            sb.append(" de ");
+            switch(months) {
+                case 0:
+                    sb.append("Enero");
+                    break;
+                case 1:
+                    sb.append("Febrero");
+                    break;
+                case 2:
+                    sb.append("Marzo");
+                    break;
+                case 3:
+                    sb.append("Abril");
+                    break;
+                case 4:
+                    sb.append("Mayo");
+                    break;
+                case 5:
+                    sb.append("Junio");
+                    break;
+                case 6:
+                    sb.append("Julio");
+                    break;
+                case 7:
+                    sb.append("Agosto");
+                    break;
+                case 8:
+                    sb.append("Septiembre");
+                    break;
+                case 9:
+                    sb.append("Octubre");
+                    break;
+                case 10:
+                    sb.append("Noviembre");
+                    break;
+                case 11:
+                    sb.append("Diciembre");
+                    break;
+            }
+            sb.append(" del ");
+            sb.append(year);
+
+            return sb.toString();
+        } catch (ParseException ex) {
+            return null;
+        }
+    }
+
     @Override
     public Response getUserPurchases() {
         List<Purchase> purchases = purchaseRepository.getUserPurchases(authenticatedUser.getId());
@@ -325,7 +382,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                 profile = TransformationUtils.createUserProfile(userProfile, purchasesTotal);
             }
         } catch (Exception ex) {
-
+            LOG.error("Could not fetch user profile", ex);
         }
         return Response.ok(profile).build();
     }
