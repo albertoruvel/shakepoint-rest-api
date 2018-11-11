@@ -28,4 +28,12 @@ public interface ShopRestService {
     public Response getAvailablePurchaseForMachine(String productId, String machineId);
 
     public Response validatePromoCode(ValidatePromoCodeRequest request);
+
+    public Response deactivateUser();
+
+    public Response activateUser();
+
+    public Response setNotificationsEnabled(boolean enabled);
+
+    public Response setEmailsEnabled(boolean enabled);
 }

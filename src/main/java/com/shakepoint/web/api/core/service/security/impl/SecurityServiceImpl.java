@@ -72,7 +72,12 @@ public class SecurityServiceImpl implements SecurityService {
             //log in with facebook
             User existingUser = userRepository.getUserByFacebookId(request.getFacebookId());
             if (existingUser != null) {
-                return Response.ok(new AuthenticationResponse("Welcome, facebook user", existingUser.getAccessToken(), true, SecurityRole.MEMBER.getValue())).build();
+                if (existingUser.isActive()) {
+                    return Response.ok(new AuthenticationResponse("Welcome, facebook user", existingUser.getAccessToken(), true, SecurityRole.MEMBER.getValue())).build();
+                } else {
+                    //user is not active
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(new AuthenticationResponse("User is not active")).build();
+                }
             } else {
                 return Response.ok(new AuthenticationResponse("Invalid credentials "))
                         .build();
@@ -91,21 +96,26 @@ public class SecurityServiceImpl implements SecurityService {
         //check user
         User user = userRepository.getUserByEmail(request.getEmail());
         if (user != null) {
-            //check pass
-            String password = cryptoService.encrypt(request.getPassword());
-            if (password.equals(user.getPassword())) {
-                //generate a new token
-                String token = ShakeUtils.getNextSessionToken();
-                //check role
-                final String role = user.getRole();
-                SecurityRole securityRole = SecurityRole.fromString(role);
-                //save it
-                userRepository.saveUserToken(user.getId(), token);
-                return Response.ok(new AuthenticationResponse("Welcome to Shakepoint", token, true, securityRole.getValue()))
-                        .build();
+            if (user.isActive()) {
+                //check pass
+                String password = cryptoService.encrypt(request.getPassword());
+                if (password.equals(user.getPassword())) {
+                    //generate a new token
+                    String token = ShakeUtils.getNextSessionToken();
+                    //check role
+                    final String role = user.getRole();
+                    SecurityRole securityRole = SecurityRole.fromString(role);
+                    //save it
+                    userRepository.saveUserToken(user.getId(), token);
+                    return Response.ok(new AuthenticationResponse("Welcome to Shakepoint", token, true, securityRole.getValue()))
+                            .build();
+                } else {
+                    return Response.ok(new AuthenticationResponse("Invalid credentials"))
+                            .build();
+                }
             } else {
-                return Response.ok(new AuthenticationResponse("Invalid credentials"))
-                        .build();
+                //user is not active
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new AuthenticationResponse("User is not active")).build();
             }
         } else {
             return Response.ok(new AuthenticationResponse("Invalid credentials"))

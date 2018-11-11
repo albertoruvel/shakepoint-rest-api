@@ -247,7 +247,10 @@ public class ShopRestServiceImpl implements ShopRestService {
                 earnedDiscountEmailParams.put("promoCode", newUserPromoCode.getCode());
                 earnedDiscountEmailParams.put("discount", newUserPromoCode.getDiscount());
 
-                emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
+                if (user.isEmailsEnabled()) {
+                    emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
+                }
+
             }
         }
 
@@ -264,7 +267,10 @@ public class ShopRestServiceImpl implements ShopRestService {
             //add to database
             promoCodeRepository.redeemPromoCode(redemption);
             //send email
-            emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
+            if (user.isEmailsEnabled()) {
+                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PROMO_PURCHASE, emailParams);
+            }
+
             //check if promo code contains a trainer assigned
             User trainer = promoCode.getTrainer();
             if (trainer != null) {
@@ -293,7 +299,10 @@ public class ShopRestServiceImpl implements ShopRestService {
             }
         } else {
             //send standard email
-            emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
+            if (user.isEmailsEnabled()) {
+                emailSender.sendEmail(user.getEmail(), Template.SUCCESSFUL_PURCHASE, emailParams);
+            }
+
             LOG.info("Successful purchase");
             if (paymentDetails != null) {
                 return Response.ok(new PurchaseQRCode(purchase.getQrCodeUrl(), true, paymentDetails.getComputedMessage())).build();
@@ -453,6 +462,41 @@ public class ShopRestServiceImpl implements ShopRestService {
 
         PromoCodeValidation validation = promoCodeManager.validatePromoCode(request);
         return Response.ok(validation).build();
+    }
+
+    @Override
+    public Response deactivateUser() {
+        User user = userRepository.get(authenticatedUser.getId());
+        user.setActive(false);
+        userRepository.updateUser(user);
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response activateUser() {
+        User user = userRepository.get(authenticatedUser.getId());
+        user.setActive(true);
+        userRepository.updateUser(user);
+
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response setNotificationsEnabled(boolean enabled) {
+        //get user
+        User user = userRepository.get(authenticatedUser.getId());
+        user.setNotificationsEnabled(enabled);
+        userRepository.updateUser(user);
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response setEmailsEnabled(boolean enabled) {
+        //get user
+        User user = userRepository.get(authenticatedUser.getId());
+        user.setEmailsEnabled(enabled);
+        userRepository.updateUser(user);
+        return Response.ok().build();
     }
 
 

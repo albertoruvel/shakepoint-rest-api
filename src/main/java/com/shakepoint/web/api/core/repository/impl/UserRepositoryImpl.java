@@ -346,10 +346,20 @@ public class UserRepositoryImpl implements UserRepository {
     @Transactional
     @Override
     public void createTrainerInformation(TrainerInformation trainerInformation) {
-        try{
+        try {
             em.merge(trainerInformation);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.error("Could not persist trainer information", ex);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateUser(User user) {
+        try{
+            em.merge(user);
+        } catch(Exception ex) {
+            log.error("Could not merge user", ex);
         }
     }
 

@@ -57,4 +57,6 @@ public interface UserRepository {
     void updateUserPassword(String encryptedPassword, String userId);
 
     void createTrainerInformation(TrainerInformation trainerInformation);
+
+    public void updateUser(User user);
 }

@@ -41,6 +41,12 @@ public class User {
     @Column(name = "access_token")
     private String accessToken;
 
+    @Column(name = "notifications_enabled")
+    private boolean notificationsEnabled;
+
+    @Column(name = "emails_enabled")
+    private boolean emailsEnabled;
+
     @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Purchase> purchases;
 
@@ -142,5 +148,21 @@ public class User {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public boolean isNotificationsEnabled() {
+        return notificationsEnabled;
+    }
+
+    public void setNotificationsEnabled(boolean notificationsEnabled) {
+        this.notificationsEnabled = notificationsEnabled;
+    }
+
+    public boolean isEmailsEnabled() {
+        return emailsEnabled;
+    }
+
+    public void setEmailsEnabled(boolean emailsEnabled) {
+        this.emailsEnabled = emailsEnabled;
     }
 }

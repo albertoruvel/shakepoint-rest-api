@@ -67,13 +67,12 @@ public class SecurityFilter implements ContainerRequestFilter {
         //validate token
         if (token == null || token.isEmpty()) {
             abort(crc);
-        } else if (!validateToken(allowedRoles, token)) {
-            abort(crc);
         }
+        validate(allowedRoles, token, crc);
 
     }
 
-    private boolean validateToken(SecurityRole[] roles, String token) {
+    private void validate(SecurityRole[] roles, String token, ContainerRequestContext crc) {
         //get user by token
         User user = null;
         try {
@@ -82,21 +81,30 @@ public class SecurityFilter implements ContainerRequestFilter {
                 for (SecurityRole role : roles) {
                     if (SecurityRole.ALL == role) {
                         userAuthenticatedEvent.fire(user.getId());
-                        return true;
+                        return;
                     } else if (SecurityRole.fromString(user.getRole()) == role) {
                         //user authenticated
                         userAuthenticatedEvent.fire(user.getId());
-                        return true;
+                        return;
                     }
                 }
-                return false;
+                abort(crc);
+            } else if (! user.isActive()) {
+                abortWithInactiveUser(crc);
             } else {
-                return false;
+                abort(crc);
+                return;
             }
         } catch (Exception ex) {
-            log.error("Error finding user: " + ex.getMessage());
-            return false;
+            abort(crc);
         }
+    }
+
+    private void abortWithInactiveUser(ContainerRequestContext crc) {
+        crc.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new AuthenticationResponse("User is currently deactivated"))
+                .type(MediaType.APPLICATION_JSON)
+                .build());
     }
 
     private void abort(ContainerRequestContext cxt) {

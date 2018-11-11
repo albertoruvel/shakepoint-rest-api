@@ -63,7 +63,9 @@ public class PartnerRestServiceImpl implements PartnerRestService {
         emailParams.put("token", user.getAccessToken());
 
         //send email to trainer with welcome and confirmation link
-        emailSender.sendEmail(user.getEmail(), Template.NEW_TRAINER, emailParams);
+        if (user.isEmailsEnabled()) {
+            emailSender.sendEmail(user.getEmail(), Template.NEW_TRAINER, emailParams);
+        }
 
         return Response.ok().build();
     }

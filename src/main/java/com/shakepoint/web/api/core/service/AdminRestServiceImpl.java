@@ -427,7 +427,9 @@ public class AdminRestServiceImpl implements AdminRestService {
             //send email only to trainer
             emailParams.put("username", promoCode.getTrainer().getName());
             emailParams.put("promocode", promoCode.getCode());
-            emailSender.sendEmail(promoCode.getTrainer().getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+            if (promoCode.getTrainer().isEmailsEnabled()) {
+                emailSender.sendEmail(promoCode.getTrainer().getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+            }
         } else {
             users.stream()
                     .forEach(user -> {
@@ -435,7 +437,10 @@ public class AdminRestServiceImpl implements AdminRestService {
                                 || user.getRole().equals(SecurityRole.TRAINER.getValue())) {
                             //send email
                             emailParams.put("username", user.getName());
-                            emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
+                            if (user.isEmailsEnabled()) {
+                                emailSender.sendEmail(user.getEmail(), Template.OPEN_PROMO_CODE_CREATED, emailParams);
+                            }
+
                         }
                     });
         }
@@ -495,7 +500,9 @@ public class AdminRestServiceImpl implements AdminRestService {
             emailParams.put("username", trainer.getName());
             promoCode.setTrainer(trainer);
             //send email to trainer
-            emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+            if (trainer.isEmailsEnabled()) {
+                emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_PROMO_CODE_CREATED, emailParams);
+            }
         }
         //persist promo code
         promoCodeRepository.createPromoCode(promoCode);
@@ -521,7 +528,9 @@ public class AdminRestServiceImpl implements AdminRestService {
         emailParams.put("promocode", promoCode.getCode());
         emailParams.put("username", user.getName());
         //send email
-        emailSender.sendEmail(user.getEmail(), Template.USER_BIRTHDATE_PROMO_CODE, emailParams);
+        if (user.isEmailsEnabled()) {
+            emailSender.sendEmail(user.getEmail(), Template.USER_BIRTHDATE_PROMO_CODE, emailParams);
+        }
     }
 
     @Override
@@ -555,7 +564,9 @@ public class AdminRestServiceImpl implements AdminRestService {
         emailParams.put("name", trainer.getName());
         emailParams.put("gymName", partner.getName());
         emailParams.put("pass", request.getPassword());
-        emailSender.sendEmail(trainerInformation.getId(), Template.NEW_TRAINER, emailParams);
+        if (trainer.isEmailsEnabled()) {
+            emailSender.sendEmail(trainer.getEmail(), Template.NEW_TRAINER, emailParams);
+        }
         return Response.ok().build();
     }
 
@@ -605,7 +616,9 @@ public class AdminRestServiceImpl implements AdminRestService {
             promoCodeRepository.createPromoCode(promoCode);
 
             Map<String, Object> parameters = new HashMap<String, Object>();
-            emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_DAILY_PROMO, parameters);
+            if (trainer.isEmailsEnabled()) {
+                emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_DAILY_PROMO, parameters);
+            }
         });
     }
 

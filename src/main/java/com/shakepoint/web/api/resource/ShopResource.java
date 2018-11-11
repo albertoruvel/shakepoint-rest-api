@@ -61,7 +61,7 @@ public class ShopResource {
     @Path("validatePromoCode")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response validatePromoCode(ValidatePromoCodeRequest request){
+    public Response validatePromoCode(ValidatePromoCodeRequest request) {
         return shopRestService.validatePromoCode(request);
     }
 
@@ -100,5 +100,29 @@ public class ShopResource {
     @POST
     public Response saveProfile(UserProfileRequest request) {
         return shopRestService.saveProfile(request);
+    }
+
+    @Path("setNotificationsEnabled")
+    @POST
+    public Response setNotificationsEnabled(@QueryParam("enabled") boolean enabled) {
+        return shopRestService.setNotificationsEnabled(enabled);
+    }
+
+    @Path("setEmailsEnabled")
+    @POST
+    public Response setEmailsEnabled(@QueryParam("enabled") boolean enabled) {
+        return shopRestService.setEmailsEnabled(enabled);
+    }
+
+    @Path("deactivate")
+    @POST
+    public Response deactivateUser() {
+        return shopRestService.deactivateUser();
+    }
+
+    @Path("activate")
+    @POST
+    public Response activateUser() {
+        return shopRestService.activateUser();
     }
 }

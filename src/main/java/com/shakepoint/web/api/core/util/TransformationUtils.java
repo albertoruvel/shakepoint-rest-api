@@ -88,6 +88,8 @@ public class TransformationUtils {
         user.setName(request.getName());
         user.setPassword(encryptedPassword);
         user.setRole(SecurityRole.TRAINER.toString());
+        user.setEmailsEnabled(true);
+        user.setNotificationsEnabled(true);
         return user;
     }
 
