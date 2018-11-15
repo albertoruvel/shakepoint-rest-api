@@ -386,7 +386,7 @@ public class ShopRestServiceImpl implements ShopRestService {
             UserProfile userProfile = userRepository.getUserProfile(user.getId());
             if (userProfile == null) {
                 profile = new UserProfileResponse
-                        (user.getName(), user.getId(), user.getCreationDate(), false, userProfile.getBirthday(), 0.0, 0.0, 0.0, user.getEmail());
+                        (user.getName(), user.getId(), user.getCreationDate(), false, null, 0.0, 0.0, 0.0, user.getEmail());
                 userRepository.saveProfile(userProfile);
             } else {
                 double purchasesTotal = TransformationUtils.getTotalPurchases(user.getPurchases());
