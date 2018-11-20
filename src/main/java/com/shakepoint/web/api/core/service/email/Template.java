@@ -14,7 +14,8 @@ public enum Template {
     FORGOT_PASSWORD_REQUEST("forgot_password_request", "Reestablecer contraseña"),
     NEW_PARTNER_ORDER_REQUEST_ADMIN("new_partner_order_admin", "Solicitud Shakepoint"),
     TRAINER_DAILY_PROMO("trainer_daily_promo", "Promoción sugerida"),
-    PASSWORD_RESET_SUCCESS("password_reset_success", "Reseteo de contraseña");
+    PASSWORD_RESET_SUCCESS("password_reset_success", "Reseteo de contraseña"),
+    CONTACT_EMAIL("contact", "Tienes un mensaje nuevo");
 
     Template(final String templateName, final String subject ){
         this.templateName = templateName;

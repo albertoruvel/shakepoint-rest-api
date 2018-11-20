@@ -5,6 +5,7 @@ import com.shakepoint.web.api.core.service.security.AllowedUsers;
 import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
+import com.shakepoint.web.api.data.dto.request.ContactRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
 import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 
@@ -124,5 +125,12 @@ public class ShopResource {
     @POST
     public Response activateUser() {
         return shopRestService.activateUser();
+    }
+
+    @Path("contact")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response contact(ContactRequest request) {
+        return shopRestService.contact(request);
     }
 }

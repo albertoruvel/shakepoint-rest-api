@@ -1,5 +1,6 @@
 package com.shakepoint.web.api.core.service;
 
+import com.github.roar109.syring.annotation.ApplicationProperty;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.machine.PurchaseStatus;
@@ -14,6 +15,7 @@ import com.shakepoint.web.api.core.shop.PayWorksClientService;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
+import com.shakepoint.web.api.data.dto.request.ContactRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
 import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.response.*;
@@ -62,6 +64,10 @@ public class ShopRestServiceImpl implements ShopRestService {
     @Inject
     @AuthenticatedUser
     private RequestPrincipal authenticatedUser;
+
+    @Inject
+    @ApplicationProperty(type = ApplicationProperty.Types.SYSTEM, name = "com.shakepoint.web.admin.orders.emails")
+    private String adminEmails; //emails list, separated by commas
 
     private final Logger LOG = Logger.getLogger(getClass());
     private static final String RETRY_UPLOAD_QUEUE_NAME = "retry_file_upload";
@@ -499,6 +505,23 @@ public class ShopRestServiceImpl implements ShopRestService {
         user.setEmailsEnabled(enabled);
         userRepository.updateUser(user);
         return Response.ok().build();
+    }
+
+    @Override
+    public Response contact(ContactRequest request) {
+        //get user
+        User user = userRepository.get(authenticatedUser.getId());
+        //send message
+        Arrays.stream(adminEmails.split(",")).forEach(email -> {
+            Map<String, Object> params = new HashMap();
+            params.put("fromName", user.getName());
+            params.put("fromEmail", user.getEmail());
+            params.put("message", request.getMessage());
+            emailSender.sendEmail(email, Template.CONTACT_EMAIL, params);
+        });
+
+        return Response.ok().build();
+
     }
 
 
