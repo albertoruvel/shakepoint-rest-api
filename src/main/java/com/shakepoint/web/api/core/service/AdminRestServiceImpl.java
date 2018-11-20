@@ -610,10 +610,14 @@ public class AdminRestServiceImpl implements AdminRestService {
             //expires last promo code
             //get promo codes that are not expired or cancelled and cancel them
             List<PromoCode> promoCodes = promoCodeRepository.getTrainerPromoCodes(trainer.getId());
-            promoCodes.stream().forEach(promo -> promoCodeRepository.cancelPromotion(promo));
+            promoCodes.stream().forEach(promo -> {
+                log.info(String.format("Cancelling promo code %s for trainer %s", promo.getCode(), trainer.getName()));
+                promoCodeRepository.cancelPromotion(promo);
+            });
 
             //create new one
             promoCodeRepository.createPromoCode(promoCode);
+            log.info(String.format("Created new promo code %s for trainer %s", promoCode.getCode(), trainer.getName()));
 
             Map<String, Object> parameters = new HashMap<String, Object>();
             if (trainer.isEmailsEnabled()) {
