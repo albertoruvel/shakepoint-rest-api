@@ -33,7 +33,7 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepository {
 
     @Override
     public List<PromoCode> getAllPromoCodes() {
-        return em.createQuery("SELECT p FROM Promo p WHERE p.status = :status")
+        return em.createQuery("SELECT p FROM Promo p WHERE p.status = :status ORDER BY p.expirationDate DESC")
                 .setParameter("status", PromoCodeStatus.ACTIVE.getValue())
                 .getResultList();
     }
