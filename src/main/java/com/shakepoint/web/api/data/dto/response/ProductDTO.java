@@ -88,4 +88,12 @@ public class ProductDTO {
     public void setNutritionalDataUrl(String nutritionalDataUrl) {
         this.nutritionalDataUrl = nutritionalDataUrl;
     }
+
+    public List<String> getAvailableScoops() {
+        return availableScoops;
+    }
+
+    public void setAvailableScoops(List<String> availableScoops) {
+        this.availableScoops = availableScoops;
+    }
 }
