@@ -26,8 +26,8 @@ public class ShopResource {
     @Path("productDetails")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProductDetails(@QueryParam("productId") String productId) {
-        return shopRestService.getProductDetails(productId);
+    public Response getProductDetails(@QueryParam("productId") String productId, @QueryParam("vendingId") String vendingId) {
+        return shopRestService.getProductDetails(productId, vendingId);
     }
 
     @Path("searchMachine")

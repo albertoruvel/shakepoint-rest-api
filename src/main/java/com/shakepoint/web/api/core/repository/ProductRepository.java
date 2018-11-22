@@ -23,4 +23,7 @@ public interface ProductRepository {
     public void createNewFlavor(Flavor flavor);
 
     public List<Flavor> getFlavors();
+
+    public Flavor getFlavor(String flavorId);
+
 }

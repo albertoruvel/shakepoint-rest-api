@@ -45,4 +45,6 @@ public interface MachineRepository {
     public List<VendingMachine> searchByName(String machineName);
 
     public VendingConnection getVendingConnection(String id);
+
+    public VendingMachineProductStatus getVendingProduct(String productId, String vendingId);
 }

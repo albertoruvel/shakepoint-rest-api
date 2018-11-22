@@ -436,11 +436,11 @@ public class ShopRestServiceImpl implements ShopRestService {
     }
 
     @Override
-    public Response getProductDetails(String productId) {
-        Product product = productRepository.getProduct(productId);
+    public Response getProductDetails(String productId, String vendingId) {
+        VendingMachineProductStatus existingProductStatus = machineRepository.getVendingProduct(productId, vendingId);
         //get number of scoops available for product type
         List<String> scoops = new ArrayList<String>();
-        switch (product.getType()) {
+        switch (existingProductStatus.getProduct().getType()) {
             case AMINO_ACID:
                 scoops.addAll(ProductScoopsType.AMINOACID_SCOOPS);
                 break;
@@ -451,8 +451,14 @@ public class ShopRestServiceImpl implements ShopRestService {
                 scoops.addAll(ProductScoopsType.PROTEIN_SCOOPS);
                 break;
         }
-        ProductDTO dto = new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getDescription(),
-                product.getLogoUrl(), ProductType.getProductTypeForClient(product.getType()), product.getNutritionalDataUrl(), scoops);
+        ProductDTO dto = new ProductDTO(existingProductStatus.getProduct().getId(), existingProductStatus.getProduct().getName(),
+                existingProductStatus.getProduct().getPrice(), existingProductStatus.getProduct().getDescription(),
+                existingProductStatus.getProduct().getLogoUrl(),
+                ProductType.getProductTypeForClient(existingProductStatus.getProduct().getType()), existingProductStatus.getProduct().getNutritionalDataUrl(), scoops);
+        //get flavor
+        Flavor flavor = productRepository.getFlavor(existingProductStatus.getFlavorId());
+        ProductFlavorDTO flavorDTO = TransformationUtils.createFlavor(flavor);
+        dto.setFlavor(flavorDTO);
         return Response.ok(dto).build();
     }
 

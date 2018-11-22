@@ -29,7 +29,7 @@ public interface AdminRestService {
 
     public Response updateTechnicianMachine(String techId, String machineId, int option);
 
-    public Response addMachineProduct(String machineId, String productId, int slotNumber);
+    public Response addMachineProduct(String machineId, String productId, int slotNumber, String flavorId);
 
     public Response deleteMachineProduct(String id);
 

@@ -98,8 +98,9 @@ public class AdminResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addMachineProduct(@QueryParam("machineId") String machineId,
                                       @QueryParam("productId") String productId,
-                                      @QueryParam("slotNumber") int slotNumber) {
-        return adminRestService.addMachineProduct(machineId, productId, slotNumber);
+                                      @QueryParam("slotNumber") int slotNumber,
+                                      @QueryParam("flavorId") String flavorId) {
+        return adminRestService.addMachineProduct(machineId, productId, slotNumber, flavorId);
     }
 
     @POST

@@ -80,12 +80,12 @@ public class MachineRepositoryImpl implements MachineRepository {
 
     @Override
     public boolean isMachineAlerted(String id) {
-        try{
-            BigInteger integer = (BigInteger)entityManager.createNativeQuery("SELECT count(*) FROM machine_product WHERE machine_id = ? AND available_percentage < 30")
+        try {
+            BigInteger integer = (BigInteger) entityManager.createNativeQuery("SELECT count(*) FROM machine_product WHERE machine_id = ? AND available_percentage < 30")
                     .setParameter(1, id)
                     .getSingleResult();
             return integer.intValue() > 0;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return false;
         }
 
@@ -93,19 +93,27 @@ public class MachineRepositoryImpl implements MachineRepository {
 
     @Override
     public List<VendingMachine> searchByName(String machineName) {
-        try{
+        try {
             return entityManager.createQuery("SELECT m FROM Machine m WHERE m.name LIKE :machineName")
                     .setParameter("machineName", "%" + machineName + "%")
                     .getResultList();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return Collections.emptyList();
         }
     }
 
     @Override
     public VendingConnection getVendingConnection(String id) {
-        return (VendingConnection)entityManager.createQuery("SELECT c FROM VendingConnection c WHERE c.machineId = :id")
+        return (VendingConnection) entityManager.createQuery("SELECT c FROM VendingConnection c WHERE c.machineId = :id")
                 .setParameter("id", id).getSingleResult();
+    }
+
+    @Override
+    public VendingMachineProductStatus getVendingProduct(String productId, String vendingId) {
+        return (VendingMachineProductStatus) entityManager.createQuery("SELECT vm FROM MachineProductStatus vm WHERE vm.machine.id = :vendingId AND vm.product.id = :productId")
+                .setParameter("vendingId", vendingId)
+                .setParameter("productId", productId)
+                .getSingleResult();
     }
 
     private static final String GET_ALERTED_MACHINES_COUNT = "select count(*) from machine m "
@@ -167,11 +175,11 @@ public class MachineRepositoryImpl implements MachineRepository {
 
     @Override
     public List<VendingMachineProductStatus> getMachineProducts(String machineId) {
-        try{
+        try {
             return entityManager.createQuery("SELECT s FROM MachineProductStatus s WHERE s.machine.id = :id")
                     .setParameter("id", machineId)
                     .getResultList();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -213,7 +221,7 @@ public class MachineRepositoryImpl implements MachineRepository {
     @Override
     public VendingMachine getMachine(String machineId) {
         try {
-            return (VendingMachine)entityManager.createQuery("SELECT m FROM Machine m WHERE m.id = :id")
+            return (VendingMachine) entityManager.createQuery("SELECT m FROM Machine m WHERE m.id = :id")
                     .setParameter("id", machineId).getSingleResult();
         } catch (Exception ex) {
             //not found
@@ -242,9 +250,9 @@ public class MachineRepositoryImpl implements MachineRepository {
     @Override
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void updateMachine(VendingMachine machine) {
-        try{
+        try {
             entityManager.merge(machine);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.error("Error trying to update machine", ex);
         }
     }

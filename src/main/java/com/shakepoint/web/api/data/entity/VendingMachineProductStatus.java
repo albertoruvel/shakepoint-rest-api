@@ -28,6 +28,9 @@ public class VendingMachineProductStatus {
     @Column(name = "slot_number")
     private int  slotNumber;
 
+    @Column(name = "flavor_id")
+    private String flavorId;
+
     public VendingMachineProductStatus() {
         id = UUID.randomUUID().toString();
     }
@@ -78,5 +81,13 @@ public class VendingMachineProductStatus {
 
     public void setSlotNumber(int slotNumber) {
         this.slotNumber = slotNumber;
+    }
+
+    public String getFlavorId() {
+        return flavorId;
+    }
+
+    public void setFlavorId(String flavorId) {
+        this.flavorId = flavorId;
     }
 }

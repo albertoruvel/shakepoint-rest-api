@@ -11,6 +11,7 @@ import com.shakepoint.web.api.data.dto.request.admin.NewProductRequest;
 import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import com.shakepoint.web.api.data.dto.request.partner.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.response.ProductDTO;
+import com.shakepoint.web.api.data.dto.response.ProductFlavorDTO;
 import com.shakepoint.web.api.data.dto.response.PurchaseCodeResponse;
 import com.shakepoint.web.api.data.dto.response.SimpleMachineProduct;
 import com.shakepoint.web.api.data.dto.response.UserProfileResponse;
@@ -23,6 +24,7 @@ import com.shakepoint.web.api.data.dto.response.admin.Technician;
 import com.shakepoint.web.api.data.dto.response.admin.TechnicianMachine;
 import com.shakepoint.web.api.data.dto.response.admin.VendingProductDetails;
 import com.shakepoint.web.api.data.dto.response.partner.Trainer;
+import com.shakepoint.web.api.data.entity.Flavor;
 import com.shakepoint.web.api.data.entity.Product;
 import com.shakepoint.web.api.data.entity.PromoCode;
 import com.shakepoint.web.api.data.entity.PromoType;
@@ -364,5 +366,9 @@ public class TransformationUtils {
         trainerInformation.setTrainerUser(trainer.getId());
         trainerInformation.setRegistrationDate(ShakeUtils.SIMPLE_DATE_FORMAT.format(new Date()));
         return trainerInformation;
+    }
+
+    public static ProductFlavorDTO createFlavor(Flavor flavor) {
+        return new ProductFlavorDTO(flavor.getId(), flavor.getHexColor(), flavor.getName());
     }
 }

@@ -99,6 +99,13 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public Flavor getFlavor(String flavorId) {
+        return (Flavor) em.createQuery("SELECT f FROM Flavor f WHERE f.id = :id")
+                .setParameter("id", flavorId)
+                .getSingleResult();
+    }
+
+    @Override
     public List<VendingMachineProductStatus> getMachineProducts(String machineId) {
         try {
             return em.createQuery("SELECT p FROM MachineProductStatus p WHERE p.machine.id = :machineId")

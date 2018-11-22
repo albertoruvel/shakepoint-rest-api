@@ -24,7 +24,7 @@ public interface ShopRestService {
 
     public Response searchMachinesByName(String machineName);
 
-    public Response getProductDetails(String productId);
+    public Response getProductDetails(String productId, String vendingId);
 
     public Response getAvailablePurchaseForMachine(String productId, String machineId);
 

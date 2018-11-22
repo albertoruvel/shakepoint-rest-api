@@ -260,7 +260,7 @@ public class AdminRestServiceImpl implements AdminRestService {
     }
 
     @Override
-    public Response addMachineProduct(String machineId, String productId, int slotNumber) {
+    public Response addMachineProduct(String machineId, String productId, int slotNumber, String flavorId) {
         VendingMachineProductStatus newMachineProduct = new VendingMachineProductStatus();
         newMachineProduct.setPercentage(100);
         VendingMachine machine = machineRepository.getMachine(machineId);
@@ -270,6 +270,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         newMachineProduct.setSlotNumber(slotNumber);
         //add the relationship
         newMachineProduct.setUpdatedBy(null);
+        newMachineProduct.setFlavorId(flavorId);
         // add the new entity
         machineRepository.addMachineProduct(newMachineProduct);
 

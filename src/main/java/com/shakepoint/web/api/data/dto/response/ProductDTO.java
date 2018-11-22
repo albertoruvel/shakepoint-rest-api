@@ -11,6 +11,7 @@ public class ProductDTO {
     private String productType;
     private String nutritionalDataUrl;
     private List<String> availableScoops;
+    private ProductFlavorDTO flavor;
 
     public ProductDTO(String id, String name, double price, String description, String logoUrl, String productType, String nutriData) {
         this.id = id;
@@ -95,5 +96,13 @@ public class ProductDTO {
 
     public void setAvailableScoops(List<String> availableScoops) {
         this.availableScoops = availableScoops;
+    }
+
+    public ProductFlavorDTO getFlavor() {
+        return flavor;
+    }
+
+    public void setFlavor(ProductFlavorDTO flavor) {
+        this.flavor = flavor;
     }
 }
