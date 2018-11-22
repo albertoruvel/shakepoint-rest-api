@@ -1,5 +1,7 @@
 package com.shakepoint.web.api.data.dto.response;
 
+import java.util.List;
+
 public class ProductDTO {
     private String id;
     private String name;
@@ -8,6 +10,7 @@ public class ProductDTO {
     private String logoUrl;
     private String productType;
     private String nutritionalDataUrl;
+    private List<String> availableScoops;
 
     public ProductDTO(String id, String name, double price, String description, String logoUrl, String productType, String nutriData) {
         this.id = id;
@@ -17,6 +20,17 @@ public class ProductDTO {
         this.logoUrl = logoUrl;
         this.productType = productType;
         this.nutritionalDataUrl = nutriData;
+    }
+
+    public ProductDTO(String id, String name, double price, String description, String logoUrl, String productType, String nutritionalDataUrl, List<String> availableScoops) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.logoUrl = logoUrl;
+        this.productType = productType;
+        this.nutritionalDataUrl = nutritionalDataUrl;
+        this.availableScoops = availableScoops;
     }
 
     public String getId() {

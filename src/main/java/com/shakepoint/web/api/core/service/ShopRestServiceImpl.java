@@ -223,7 +223,7 @@ public class ShopRestServiceImpl implements ShopRestService {
         }
     }
 
-    private Response processSuccessfulDrink(Purchase purchase, User user, PaymentDetails paymentDetails, PromoCode promoCode){
+    private Response processSuccessfulDrink(Purchase purchase, User user, PaymentDetails paymentDetails, PromoCode promoCode) {
         //payment went well
         purchase.setUser(user);
         purchase.setStatus(PurchaseStatus.AUTHORIZED);
@@ -319,7 +319,7 @@ public class ShopRestServiceImpl implements ShopRestService {
     }
 
     private String formatCompletePurchaseDate(String purchaseDate) {
-        try{
+        try {
             Date date = ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.parse(purchaseDate);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
@@ -330,7 +330,7 @@ public class ShopRestServiceImpl implements ShopRestService {
             StringBuilder sb = new StringBuilder();
             sb.append(days);
             sb.append(" de ");
-            switch(months) {
+            switch (months) {
                 case 0:
                     sb.append("Enero");
                     break;
@@ -438,8 +438,21 @@ public class ShopRestServiceImpl implements ShopRestService {
     @Override
     public Response getProductDetails(String productId) {
         Product product = productRepository.getProduct(productId);
+        //get number of scoops available for product type
+        List<String> scoops = new ArrayList<String>();
+        switch (product.getType()) {
+            case AMINO_ACID:
+                scoops.addAll(ProductScoopsType.AMINOACID_SCOOPS);
+                break;
+            case OXIDE:
+                scoops.addAll(ProductScoopsType.OXIDE_SCOOPS);
+                break;
+            case PROTEIN:
+                scoops.addAll(ProductScoopsType.PROTEIN_SCOOPS);
+                break;
+        }
         ProductDTO dto = new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getDescription(),
-                product.getLogoUrl(), ProductType.getProductTypeForClient(product.getType()), product.getNutritionalDataUrl());
+                product.getLogoUrl(), ProductType.getProductTypeForClient(product.getType()), product.getNutritionalDataUrl(), scoops);
         return Response.ok(dto).build();
     }
 
