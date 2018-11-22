@@ -112,7 +112,7 @@ public class ShopRestServiceImpl implements ShopRestService {
         for (VendingMachineProductStatus p : productsStatus) {
             products.add(p.getProduct());
         }
-        List<ProductDTO> productsDTO = TransformationUtils.createProducts(products);
+        List<ProductDTO> productsDTO = TransformationUtils.createProductsFromStatus(productsStatus);
         return Response.ok(productsDTO).build();
     }
 
@@ -456,8 +456,7 @@ public class ShopRestServiceImpl implements ShopRestService {
                 existingProductStatus.getProduct().getLogoUrl(),
                 ProductType.getProductTypeForClient(existingProductStatus.getProduct().getType()), existingProductStatus.getProduct().getNutritionalDataUrl(), scoops);
         //get flavor
-        Flavor flavor = productRepository.getFlavor(existingProductStatus.getFlavorId());
-        ProductFlavorDTO flavorDTO = TransformationUtils.createFlavor(flavor);
+        ProductFlavorDTO flavorDTO = TransformationUtils.createFlavor(existingProductStatus.getFlavor());
         dto.setFlavor(flavorDTO);
         return Response.ok(dto).build();
     }

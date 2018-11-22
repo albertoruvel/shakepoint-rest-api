@@ -28,8 +28,9 @@ public class VendingMachineProductStatus {
     @Column(name = "slot_number")
     private int  slotNumber;
 
-    @Column(name = "flavor_id")
-    private String flavorId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "flavor_id")
+    private Flavor flavor;
 
     public VendingMachineProductStatus() {
         id = UUID.randomUUID().toString();
@@ -83,11 +84,11 @@ public class VendingMachineProductStatus {
         this.slotNumber = slotNumber;
     }
 
-    public String getFlavorId() {
-        return flavorId;
+    public Flavor getFlavor() {
+        return flavor;
     }
 
-    public void setFlavorId(String flavorId) {
-        this.flavorId = flavorId;
+    public void setFlavor(Flavor flavor) {
+        this.flavor = flavor;
     }
 }

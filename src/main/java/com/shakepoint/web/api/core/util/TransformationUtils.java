@@ -12,6 +12,7 @@ import com.shakepoint.web.api.data.dto.request.admin.NewTechnicianRequest;
 import com.shakepoint.web.api.data.dto.request.partner.CreateTrainerRequest;
 import com.shakepoint.web.api.data.dto.response.ProductDTO;
 import com.shakepoint.web.api.data.dto.response.ProductFlavorDTO;
+import com.shakepoint.web.api.data.dto.response.ProductScoopsType;
 import com.shakepoint.web.api.data.dto.response.PurchaseCodeResponse;
 import com.shakepoint.web.api.data.dto.response.SimpleMachineProduct;
 import com.shakepoint.web.api.data.dto.response.UserProfileResponse;
@@ -46,6 +47,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.shakepoint.web.api.core.machine.ProductType.AMINO_ACID;
+import static com.shakepoint.web.api.core.machine.ProductType.OXIDE;
+import static com.shakepoint.web.api.core.machine.ProductType.PROTEIN;
 
 public class TransformationUtils {
 
@@ -241,12 +246,50 @@ public class TransformationUtils {
         return dtos;
     }
 
+    public static List<ProductDTO> createProductsFromStatus(List<VendingMachineProductStatus> entities) {
+        List<ProductDTO> productsList = new ArrayList();
+        entities.stream().forEach(status -> {
+            try{
+                ProductDTO dto = new ProductDTO(status.getProduct().getId(), status.getProduct().getName(), status.getProduct().getPrice(),
+                        new String(status.getProduct().getDescription().getBytes(), "UTF-8"), status.getProduct().getLogoUrl(),
+                        ProductType.getProductTypeForClient(status.getProduct().getType()), status.getProduct().getNutritionalDataUrl());
+                switch(status.getProduct().getType()) {
+                    case AMINO_ACID:
+                        dto.setAvailableScoops(ProductScoopsType.AMINOACID_SCOOPS);
+                        break;
+                    case OXIDE:
+                        dto.setAvailableScoops(ProductScoopsType.OXIDE_SCOOPS);
+                        break;
+                    case PROTEIN:
+                        dto.setAvailableScoops(ProductScoopsType.PROTEIN_SCOOPS);
+                        break;
+                }
+                dto.setFlavor(createFlavor(status.getFlavor()));
+                productsList.add(dto);
+            } catch(UnsupportedEncodingException ex) {
+                log.info("Could not transform encoding", ex);
+            }
+        });
+        return productsList;
+    }
+
     public static List<ProductDTO> createProducts(List<Product> entities) {
         List<ProductDTO> productsList = new ArrayList();
         try {
             for (Product p : entities) {
-                productsList.add(new ProductDTO(p.getId(), p.getName(), p.getPrice(), new String(p.getDescription().getBytes(), "UTF-8"), p.getLogoUrl(),
-                        ProductType.getProductTypeForClient(p.getType()), p.getNutritionalDataUrl()));
+                ProductDTO dto = new ProductDTO(p.getId(), p.getName(), p.getPrice(), new String(p.getDescription().getBytes(), "UTF-8"), p.getLogoUrl(),
+                        ProductType.getProductTypeForClient(p.getType()), p.getNutritionalDataUrl());
+                switch(p.getType()) {
+                    case AMINO_ACID:
+                        dto.setAvailableScoops(ProductScoopsType.AMINOACID_SCOOPS);
+                        break;
+                    case OXIDE:
+                        dto.setAvailableScoops(ProductScoopsType.OXIDE_SCOOPS);
+                        break;
+                    case PROTEIN:
+                        dto.setAvailableScoops(ProductScoopsType.PROTEIN_SCOOPS);
+                        break;
+                }
             }
         } catch (UnsupportedEncodingException ex) {
             log.info("Could not transform encoding", ex);

@@ -270,7 +270,7 @@ public class AdminRestServiceImpl implements AdminRestService {
         newMachineProduct.setSlotNumber(slotNumber);
         //add the relationship
         newMachineProduct.setUpdatedBy(null);
-        newMachineProduct.setFlavorId(flavorId);
+        newMachineProduct.setFlavor(productRepository.getFlavor(flavorId));
         // add the new entity
         machineRepository.addMachineProduct(newMachineProduct);
 
