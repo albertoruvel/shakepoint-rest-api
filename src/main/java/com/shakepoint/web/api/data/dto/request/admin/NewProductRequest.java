@@ -7,9 +7,10 @@ public class NewProductRequest {
     private String logoUrl;
     private String engineUseTime;
     private String productType;
+    private Integer mixTime;
     private byte[] nutritionalDataImage;
 
-    public NewProductRequest(String name, double price, String description, String logoUrl, String engineUseTime, String productType, byte[] nutritionalDataImage) {
+    public NewProductRequest(String name, double price, String description, String logoUrl, String engineUseTime, String productType, Integer mixTime, byte[] nutritionalDataImage) {
         this.name = name;
         this.price = price;
         this.description = description;
@@ -17,6 +18,15 @@ public class NewProductRequest {
         this.engineUseTime = engineUseTime;
         this.productType = productType;
         this.nutritionalDataImage = nutritionalDataImage;
+        this.mixTime = mixTime;
+    }
+
+    public Integer getMixTime() {
+        return mixTime;
+    }
+
+    public void setMixTime(Integer mixTime) {
+        this.mixTime = mixTime;
     }
 
     public String getName() {

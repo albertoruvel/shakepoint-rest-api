@@ -37,6 +37,9 @@ public class Product {
     @Column(name = "nutritional_data_url")
     private String nutritionalDataUrl;
 
+    @Column(name = "mix_time")
+    private Integer mixTime;
+
     public Product() {
         id = UUID.randomUUID().toString();
     }
@@ -112,5 +115,13 @@ public class Product {
 
     public void setNutritionalDataUrl(String nutritionalDataUrl) {
         this.nutritionalDataUrl = nutritionalDataUrl;
+    }
+
+    public Integer getMixTime() {
+        return mixTime;
+    }
+
+    public void setMixTime(Integer mixTime) {
+        this.mixTime = mixTime;
     }
 }

@@ -620,6 +620,7 @@ public class AdminRestServiceImpl implements AdminRestService {
             log.info(String.format("Created new promo code %s for trainer %s", promoCode.getCode(), trainer.getName()));
 
             Map<String, Object> parameters = new HashMap<String, Object>();
+            parameters.put("code", promoCode.getCode());
             if (trainer.isEmailsEnabled()) {
                 emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_DAILY_PROMO, parameters);
             }

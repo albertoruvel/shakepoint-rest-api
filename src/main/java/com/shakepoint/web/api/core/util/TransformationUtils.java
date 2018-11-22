@@ -59,6 +59,7 @@ public class TransformationUtils {
             p.setPrice(product.getPrice());
             p.setType(ProductType.getProductType(product.getProductType()));
             p.setEngineUseTime(product.getEngineUseTime());
+            p.setMixTime(product.getMixTime());
         } catch (UnsupportedEncodingException ex) {
             log.info("Could not transform encoding", ex);
         }
@@ -288,7 +289,8 @@ public class TransformationUtils {
             final String logoUrl = multipart.getFormDataPart("logoUrl", String.class, null);
             final String engineUseTime = multipart.getFormDataPart("engineUseTime", String.class, null);
             final String productType = multipart.getFormDataPart("productType", String.class, null);
-            return new NewProductRequest(name, price, description, logoUrl, engineUseTime, productType, bytes);
+            final String mixTime = multipart.getFormDataPart("mixTime", String.class, null);
+            return new NewProductRequest(name, price, description, logoUrl, engineUseTime, productType, Integer.parseInt(mixTime), bytes);
         } catch (IOException ex) {
             log.error("Could not extract data from multipart", ex);
             return null;
