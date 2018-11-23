@@ -436,8 +436,8 @@ public class ShopRestServiceImpl implements ShopRestService {
     }
 
     @Override
-    public Response getProductDetails(String productId, String vendingId) {
-        VendingMachineProductStatus existingProductStatus = machineRepository.getVendingProduct(productId, vendingId);
+    public Response getProductDetails(String productId, String vendingId, int slotNumber) {
+        VendingMachineProductStatus existingProductStatus = machineRepository.getVendingProduct(productId, vendingId, slotNumber);
         //get number of scoops available for product type
         List<String> scoops = new ArrayList<String>();
         switch (existingProductStatus.getProduct().getType()) {

@@ -46,5 +46,5 @@ public interface MachineRepository {
 
     public VendingConnection getVendingConnection(String id);
 
-    public VendingMachineProductStatus getVendingProduct(String productId, String vendingId);
+    public VendingMachineProductStatus getVendingProduct(String productId, String vendingId, int slot);
 }

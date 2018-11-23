@@ -109,10 +109,11 @@ public class MachineRepositoryImpl implements MachineRepository {
     }
 
     @Override
-    public VendingMachineProductStatus getVendingProduct(String productId, String vendingId) {
-        return (VendingMachineProductStatus) entityManager.createQuery("SELECT vm FROM MachineProductStatus vm WHERE vm.machine.id = :vendingId AND vm.product.id = :productId")
+    public VendingMachineProductStatus getVendingProduct(String productId, String vendingId, int slot) {
+        return (VendingMachineProductStatus) entityManager.createQuery("SELECT vm FROM MachineProductStatus vm WHERE vm.machine.id = :vendingId AND vm.product.id = :productId AND vm.slotNumber = :slot")
                 .setParameter("vendingId", vendingId)
                 .setParameter("productId", productId)
+                .setParameter("slot", slot)
                 .getSingleResult();
     }
 
