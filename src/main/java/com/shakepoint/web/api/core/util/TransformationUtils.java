@@ -265,6 +265,7 @@ public class TransformationUtils {
                         break;
                 }
                 dto.setFlavor(createFlavor(status.getFlavor()));
+                dto.setSlotNumber(status.getSlotNumber());
                 productsList.add(dto);
             } catch(UnsupportedEncodingException ex) {
                 log.info("Could not transform encoding", ex);

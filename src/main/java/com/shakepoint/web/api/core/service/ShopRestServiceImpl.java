@@ -108,10 +108,6 @@ public class ShopRestServiceImpl implements ShopRestService {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         List<VendingMachineProductStatus> productsStatus = machineRepository.getMachineProducts(machineId);
-        List<Product> products = new ArrayList();
-        for (VendingMachineProductStatus p : productsStatus) {
-            products.add(p.getProduct());
-        }
         List<ProductDTO> productsDTO = TransformationUtils.createProductsFromStatus(productsStatus);
         return Response.ok(productsDTO).build();
     }

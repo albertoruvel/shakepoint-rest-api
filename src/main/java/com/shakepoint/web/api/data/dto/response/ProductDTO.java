@@ -12,6 +12,7 @@ public class ProductDTO {
     private String nutritionalDataUrl;
     private List<String> availableScoops;
     private ProductFlavorDTO flavor;
+    private int slotNumber;
 
     public ProductDTO(String id, String name, double price, String description, String logoUrl, String productType, String nutriData) {
         this.id = id;
@@ -32,6 +33,14 @@ public class ProductDTO {
         this.productType = productType;
         this.nutritionalDataUrl = nutritionalDataUrl;
         this.availableScoops = availableScoops;
+    }
+
+    public int getSlotNumber() {
+        return slotNumber;
+    }
+
+    public void setSlotNumber(int slotNumber) {
+        this.slotNumber = slotNumber;
     }
 
     public String getId() {
