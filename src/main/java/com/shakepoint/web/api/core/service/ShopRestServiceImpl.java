@@ -465,9 +465,9 @@ public class ShopRestServiceImpl implements ShopRestService {
     }
 
     @Override
-    public Response getAvailablePurchaseForMachine(String productId, String machineId) {
+    public Response getAvailablePurchaseForMachine(String productId, String machineId, Integer slot) {
         //get available products
-        List<Purchase> purchases = purchaseRepository.getAvailablePurchasesForMachine(productId, machineId);
+        List<Purchase> purchases = purchaseRepository.getAvailablePurchasesForMachine(productId, machineId, slot);
         LOG.info(String.format("Got a total of %d available purchases", purchases.size()));
         if (purchases.isEmpty()) {
             return Response.ok(new AvailablePurchaseResponse(null)).build();

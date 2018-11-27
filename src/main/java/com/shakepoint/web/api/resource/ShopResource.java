@@ -78,8 +78,8 @@ public class ShopResource {
     @Path("getAvailablePurchaseForMachine")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAvailablePurchaseForMachine(@QueryParam("machineId") String machineId, @QueryParam("productId") String productId) {
-        return shopRestService.getAvailablePurchaseForMachine(productId, machineId);
+    public Response getAvailablePurchaseForMachine(@QueryParam("machineId") String machineId, @QueryParam("productId") String productId, @QueryParam("slot") Integer productSlot) {
+        return shopRestService.getAvailablePurchaseForMachine(productId, machineId, productSlot);
     }
 
     @Path("getPurchases")

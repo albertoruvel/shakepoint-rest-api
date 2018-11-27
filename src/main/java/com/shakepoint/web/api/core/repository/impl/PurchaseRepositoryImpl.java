@@ -56,11 +56,12 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
         em.merge(purchase);
     }
 
-    public List<Purchase> getAvailablePurchasesForMachine(String productId, String machineId) {
+    public List<Purchase> getAvailablePurchasesForMachine(String productId, String machineId, Integer slot) {
         try {
-            List<Purchase> list = em.createQuery("SELECT p FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.status = :status")
+            List<Purchase> list = em.createQuery("SELECT p FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.status = :status JOIN p.machine.products as p WHERE p.slotNumber = :slot")
                     .setParameter("machineId", machineId)
                     .setParameter("productId", productId)
+                    .setParameter("slot", slot)
                     .setParameter("status", PurchaseStatus.PRE_AUTH)
                     .getResultList();
             return list;

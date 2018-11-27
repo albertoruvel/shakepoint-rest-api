@@ -27,7 +27,7 @@ public interface ShopRestService {
 
     public Response getProductDetails(String productId, String vendingId, int slotNumber);
 
-    public Response getAvailablePurchaseForMachine(String productId, String machineId);
+    public Response getAvailablePurchaseForMachine(String productId, String machineId, Integer slot);
 
     public Response validatePromoCode(ValidatePromoCodeRequest request);
 

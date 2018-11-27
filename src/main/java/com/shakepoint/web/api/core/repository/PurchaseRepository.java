@@ -17,7 +17,7 @@ public interface PurchaseRepository {
 	public List<Purchase> getAuthorizedPurchases(String userId, String machineId);
 	public List<Purchase> getUserPurchases(String userId);
 	public void update(Purchase purchase);
-	public List<Purchase> getAvailablePurchasesForMachine(String productId, String machineId);
+	public List<Purchase> getAvailablePurchasesForMachine(String productId, String machineId, Integer slot);
 
 	public Integer getProductCountForDateRange(String id, String[] range, String machineId);
 }
