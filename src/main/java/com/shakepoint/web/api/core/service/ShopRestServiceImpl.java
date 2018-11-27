@@ -32,7 +32,6 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 
 public class ShopRestServiceImpl implements ShopRestService {
@@ -467,13 +466,14 @@ public class ShopRestServiceImpl implements ShopRestService {
     @Override
     public Response getAvailablePurchaseForMachine(String productId, String machineId, Integer slot) {
         //get available products
-        List<Purchase> purchases = purchaseRepository.getAvailablePurchasesForMachine(productId, machineId, slot);
-        LOG.info(String.format("Got a total of %d available purchases", purchases.size()));
-        if (purchases.isEmpty()) {
+        VendingMachineProductStatus status = machineRepository.getVendingProduct(productId, machineId, slot);
+
+        Purchase purchase = purchaseRepository.getAvailablePurchaseForMachine(productId, machineId, slot);
+        if (purchase == null) {
             return Response.ok(new AvailablePurchaseResponse(null)).build();
         } else {
             //get the first one
-            return Response.ok(new AvailablePurchaseResponse(purchases.get(0).getId())).build();
+            return Response.ok(new AvailablePurchaseResponse(purchase.getId())).build();
         }
     }
 

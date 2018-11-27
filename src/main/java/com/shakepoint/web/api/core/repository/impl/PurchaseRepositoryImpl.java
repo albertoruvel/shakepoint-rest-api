@@ -6,6 +6,7 @@ import com.shakepoint.web.api.core.repository.PurchaseRepository;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.Purchase;
 import com.shakepoint.web.api.data.entity.VendingMachine;
+import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 import org.apache.log4j.Logger;
 
 import javax.ejb.Stateless;
@@ -14,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 public class PurchaseRepositoryImpl implements PurchaseRepository {
@@ -56,18 +58,30 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
         em.merge(purchase);
     }
 
-    public List<Purchase> getAvailablePurchasesForMachine(String productId, String machineId, Integer slot) {
+    public Purchase getAvailablePurchaseForMachine(String productId, String machineId, Integer slot) {
         try {
-            List<Purchase> list = em.createQuery("SELECT p FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.status = :status JOIN p.machine.products as p WHERE p.slotNumber = :slot")
+            List<Purchase> purchases = em.createQuery("SELECT p FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.status = :status " +
+                    "AND p.machine")
                     .setParameter("machineId", machineId)
                     .setParameter("productId", productId)
-                    .setParameter("slot", slot)
                     .setParameter("status", PurchaseStatus.PRE_AUTH)
                     .getResultList();
-            return list;
+
+            List<Purchase> filteredPurchases = new ArrayList<Purchase>();
+            purchases.stream().forEach(purchase -> {
+                //get statuses
+                List<VendingMachineProductStatus> list = purchase.getMachine().getProducts().stream()
+                        .filter(status -> status.getSlotNumber() == slot && status.getProduct().getId().equals(purchase.getProduct().getId())).collect(Collectors.toList());
+                if (! list.isEmpty()) {
+                    filteredPurchases.add(purchase);
+                    log.info(String.format("Found purchase with machine name %s, product name %s, slot number: %d", purchase.getMachine().getName(), purchase.getProduct().getName(), slot));
+                }
+
+            });
+            return filteredPurchases.isEmpty() ? null : filteredPurchases.get(0);
         } catch (Exception ex) {
             log.error("Could not get available purchase for machine", ex);
-            return Collections.emptyList();
+            return null;
         }
     }
 
@@ -75,10 +89,10 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
     public Integer getProductCountForDateRange(String id, String[] range, String machineId) {
         int counter = 0;
         Long value;
-        try{
-            for (String date : range){
+        try {
+            for (String date : range) {
                 String format = String.format("SELECT COUNT(p.id) FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.purchaseDate LIKE '%s' AND p.status <> :status", date + "%");
-                value = (Long)em.createQuery(format)
+                value = (Long) em.createQuery(format)
                         .setParameter("machineId", machineId)
                         .setParameter("productId", id)
                         .setParameter("status", PurchaseStatus.PRE_AUTH)
@@ -86,7 +100,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
                 counter += value;
             }
             return counter;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.error("Could get total products for machine and product", ex);
             return 0;
         }

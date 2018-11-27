@@ -12,6 +12,7 @@ import com.shakepoint.web.api.data.entity.VendingMachine;
 import com.shakepoint.web.api.data.entity.VendingMachineProductStatus;
 import org.apache.log4j.Logger;
 
+import javax.ejb.NoSuchEntityException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -110,11 +111,15 @@ public class MachineRepositoryImpl implements MachineRepository {
 
     @Override
     public VendingMachineProductStatus getVendingProduct(String productId, String vendingId, int slot) {
-        return (VendingMachineProductStatus) entityManager.createQuery("SELECT vm FROM MachineProductStatus vm WHERE vm.machine.id = :vendingId AND vm.product.id = :productId AND vm.slotNumber = :slot")
-                .setParameter("vendingId", vendingId)
-                .setParameter("productId", productId)
-                .setParameter("slot", slot)
-                .getSingleResult();
+        try{
+            return (VendingMachineProductStatus) entityManager.createQuery("SELECT vm FROM MachineProductStatus vm WHERE vm.machine.id = :vendingId AND vm.product.id = :productId AND vm.slotNumber = :slot")
+                    .setParameter("vendingId", vendingId)
+                    .setParameter("productId", productId)
+                    .setParameter("slot", slot)
+                    .getSingleResult();
+        } catch(NoSuchEntityException ex) {
+            return null;
+        }
     }
 
     private static final String GET_ALERTED_MACHINES_COUNT = "select count(*) from machine m "
