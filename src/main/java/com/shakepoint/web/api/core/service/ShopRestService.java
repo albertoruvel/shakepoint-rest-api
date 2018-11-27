@@ -2,6 +2,7 @@ package com.shakepoint.web.api.core.service;
 
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.ContactRequest;
+import com.shakepoint.web.api.data.dto.request.FcmTokenRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
 import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 
@@ -39,4 +40,6 @@ public interface ShopRestService {
     public Response setEmailsEnabled(boolean enabled);
 
     public Response contact(ContactRequest request);
+
+    public Response setFcmToken(FcmTokenRequest request);
 }

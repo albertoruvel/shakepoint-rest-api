@@ -18,9 +18,9 @@ public class ProductScoopsType {
         AMINOACID_SCOOPS.add("2");
 
         OXIDE_SCOOPS = new ArrayList<>();
-        OXIDE_SCOOPS.add("1/2");
+        OXIDE_SCOOPS.add(".5");
         OXIDE_SCOOPS.add("1");
-        OXIDE_SCOOPS.add("1 1/2");
+        OXIDE_SCOOPS.add("1.5");
         OXIDE_SCOOPS.add("2");
     }
 

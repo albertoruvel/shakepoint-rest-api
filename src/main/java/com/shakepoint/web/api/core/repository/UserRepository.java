@@ -59,4 +59,6 @@ public interface UserRepository {
     void createTrainerInformation(TrainerInformation trainerInformation);
 
     public void updateUser(User user);
+
+    public void updateFcmToken(String fcmToken, String id);
 }

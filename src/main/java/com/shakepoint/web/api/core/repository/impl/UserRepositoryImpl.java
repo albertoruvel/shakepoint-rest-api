@@ -363,5 +363,18 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    @Override
+    @Transactional
+    public void updateFcmToken(String fcmToken, String id) {
+        try{
+            em.createQuery("UPDATE User u SET u.fcmToken = :token WHERE u.id = :id")
+                    .setParameter("token", fcmToken)
+                    .setParameter("id", id)
+                    .executeUpdate();
+        }catch(Exception ex) {
+            log.error("Could not set fcm token ", ex);
+        }
+    }
+
 
 }

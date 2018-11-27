@@ -6,6 +6,7 @@ import com.shakepoint.web.api.core.service.security.Secured;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.ContactRequest;
+import com.shakepoint.web.api.data.dto.request.FcmTokenRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
 import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 
@@ -132,5 +133,11 @@ public class ShopResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response contact(ContactRequest request) {
         return shopRestService.contact(request);
+    }
+
+    @Path("setFcmToken")
+    @POST
+    public Response setFcmToken(FcmTokenRequest request) {
+        return shopRestService.setFcmToken(request);
     }
 }

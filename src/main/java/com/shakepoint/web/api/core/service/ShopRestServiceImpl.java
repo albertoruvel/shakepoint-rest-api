@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.core.service;
 
 import com.github.roar109.syring.annotation.ApplicationProperty;
+import com.google.gson.Gson;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import com.shakepoint.web.api.core.machine.ProductType;
 import com.shakepoint.web.api.core.machine.PurchaseStatus;
@@ -16,10 +17,13 @@ import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.core.util.TransformationUtils;
 import com.shakepoint.web.api.data.dto.request.ConfirmPurchaseRequest;
 import com.shakepoint.web.api.data.dto.request.ContactRequest;
+import com.shakepoint.web.api.data.dto.request.FcmTokenRequest;
 import com.shakepoint.web.api.data.dto.request.UserProfileRequest;
 import com.shakepoint.web.api.data.dto.request.ValidatePromoCodeRequest;
 import com.shakepoint.web.api.data.dto.response.*;
 import com.shakepoint.web.api.data.entity.*;
+import com.shakepoint.web.api.data.fcm.FcmMessageType;
+import com.shakepoint.web.api.data.fcm.FcmNotification;
 import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
@@ -71,6 +75,7 @@ public class ShopRestServiceImpl implements ShopRestService {
 
     private final Logger LOG = Logger.getLogger(getClass());
     private static final String RETRY_UPLOAD_QUEUE_NAME = "retry_file_upload";
+    private static final String FCM_SEND_QUEUE_NAME = "fcm_send";
 
     @Override
     public Response searchMachine(double longitude, double latitude) {
@@ -243,14 +248,16 @@ public class ShopRestServiceImpl implements ShopRestService {
                         "Te has ganado un descuento!", 50, PromoType.EARNED.getValue());
                 LOG.info("Creating new promo code for free drink for 10 purchases");
                 promoCodeRepository.createPromoCode(newUserPromoCode);
-
                 Map<String, Object> earnedDiscountEmailParams = new HashMap<>();
                 earnedDiscountEmailParams.put("username", user.getName());
                 earnedDiscountEmailParams.put("promoCode", newUserPromoCode.getCode());
                 earnedDiscountEmailParams.put("discount", newUserPromoCode.getDiscount());
-
                 if (user.isEmailsEnabled()) {
                     emailSender.sendEmail(user.getEmail(), Template.EARNED_DRINK_DISCOUNT, earnedDiscountEmailParams);
+                }
+                if (user.isNotificationsEnabled()) {
+                    jmsHandler.send(FCM_SEND_QUEUE_NAME, new Gson().toJson(FcmNotification.createNotification(FcmMessageType.TENTH_PURCHASE,
+                            "Te has ganado un descuento!", "Felicidades!", user.getFcmToken(), earnedDiscountEmailParams)));
                 }
 
             }
@@ -536,6 +543,12 @@ public class ShopRestServiceImpl implements ShopRestService {
 
         return Response.ok().build();
 
+    }
+
+    @Override
+    public Response setFcmToken(FcmTokenRequest request) {
+        userRepository.updateFcmToken(request.getFcmToken(), authenticatedUser.getId());
+        return Response.ok().build();
     }
 
 

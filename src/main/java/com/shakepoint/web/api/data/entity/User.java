@@ -50,6 +50,9 @@ public class User {
     @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Purchase> purchases;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     public User() {
         id = UUID.randomUUID().toString();
     }
@@ -164,5 +167,13 @@ public class User {
 
     public void setEmailsEnabled(boolean emailsEnabled) {
         this.emailsEnabled = emailsEnabled;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }
