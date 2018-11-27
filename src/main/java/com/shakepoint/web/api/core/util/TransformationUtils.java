@@ -395,7 +395,9 @@ public class TransformationUtils {
     public static List<com.shakepoint.web.api.data.dto.response.partner.Trainer> createTrainers(List<User> trainers) {
         List<com.shakepoint.web.api.data.dto.response.partner.Trainer> trainersList = new ArrayList<>();
         trainers.stream().forEach(t -> {
-            trainersList.add(createTrainer(t.getId(), t.getName(), t.getEmail()));
+            Trainer trainer = createTrainer(t.getId(), t.getName(), t.getEmail());
+            trainer.setRegistrationDate(t.getCreationDate());
+            trainersList.add(trainer);
         });
         return trainersList;
     }

@@ -4,6 +4,7 @@ public class Trainer {
     private String id;
     private String name;
     private String email;
+    private String registrationDate;
 
     public Trainer(String id, String name, String email) {
         this.id = id;
@@ -33,5 +34,13 @@ public class Trainer {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(String registrationDate) {
+        this.registrationDate = registrationDate;
     }
 }
