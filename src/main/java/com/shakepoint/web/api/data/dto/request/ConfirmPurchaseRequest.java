@@ -6,6 +6,7 @@ public class ConfirmPurchaseRequest {
     private String cardExpirationDate;
     private String cvv;
     private String promoCode;
+    private Double scoops;
 
 
     public ConfirmPurchaseRequest() {
@@ -50,5 +51,13 @@ public class ConfirmPurchaseRequest {
 
     public void setPromoCode(String promoCode) {
         this.promoCode = promoCode;
+    }
+
+    public Double getScoops() {
+        return scoops;
+    }
+
+    public void setScoops(Double scoops) {
+        this.scoops = scoops;
     }
 }
