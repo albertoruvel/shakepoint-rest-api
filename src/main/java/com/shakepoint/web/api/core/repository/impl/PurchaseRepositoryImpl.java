@@ -60,8 +60,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 
     public Purchase getAvailablePurchaseForMachine(String productId, String machineId, Integer slot) {
         try {
-            List<Purchase> purchases = em.createQuery("SELECT p FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.status = :status " +
-                    "AND p.machine")
+            List<Purchase> purchases = em.createQuery("SELECT p FROM Purchase p WHERE p.machine.id = :machineId AND p.product.id = :productId AND p.status = :status")
                     .setParameter("machineId", machineId)
                     .setParameter("productId", productId)
                     .setParameter("status", PurchaseStatus.PRE_AUTH)
