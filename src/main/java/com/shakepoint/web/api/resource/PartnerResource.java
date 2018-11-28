@@ -46,7 +46,7 @@ public class PartnerResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("convertUser")
-    public Response convertUser(String memberId, String convertType) {
+    public Response convertUser(@QueryParam("memberId") String memberId, @QueryParam("convertType")String convertType) {
         return partnerRestService.convertUser(memberId, convertType);
     }
 
