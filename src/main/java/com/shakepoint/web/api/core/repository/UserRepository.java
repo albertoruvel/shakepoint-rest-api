@@ -6,7 +6,6 @@
 package com.shakepoint.web.api.core.repository;
 
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
-import com.shakepoint.web.api.data.entity.PartnerTrainer;
 import com.shakepoint.web.api.data.entity.TrainerInformation;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
@@ -46,8 +45,6 @@ public interface UserRepository {
 
     public List<User> getTrainers();
 
-    public void addPartnerTrainer(PartnerTrainer partnerTrainer);
-
     public List<User> getTrainersForPartner(String id);
 
     User getUserByFacebookId(String facebookId);
@@ -64,4 +61,9 @@ public interface UserRepository {
 
     public List<User> searchMembersByEmail(String email);
 
+    public TrainerInformation getTrainerInfoForPartner(String memberId, String partnerId);
+
+    public void removeTrainerInformation(String partnerId, String memberId);
+
+    public void updateTrainerInformation(TrainerInformation existingTrainerInformation);
 }

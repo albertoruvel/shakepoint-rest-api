@@ -26,6 +26,9 @@ public class TrainerInformation {
     @Column(name = "registration_date")
     private String registrationDate;
 
+    @Column(name = "active")
+    private boolean active;
+
     public TrainerInformation() {
         this.id = UUID.randomUUID().toString();
     }
@@ -60,5 +63,13 @@ public class TrainerInformation {
 
     public void setRegistrationDate(String registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

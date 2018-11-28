@@ -4,13 +4,13 @@ import com.shakepoint.web.api.core.repository.UserRepository;
 import com.shakepoint.web.api.core.service.security.SecurityRole;
 import com.shakepoint.web.api.core.util.ShakeUtils;
 import com.shakepoint.web.api.data.entity.PartnerProductOrder;
-import com.shakepoint.web.api.data.entity.PartnerTrainer;
 import com.shakepoint.web.api.data.entity.TrainerInformation;
 import com.shakepoint.web.api.data.entity.User;
 import com.shakepoint.web.api.data.entity.UserPassword;
 import com.shakepoint.web.api.data.entity.UserProfile;
 import org.apache.log4j.Logger;
 
+import javax.ejb.NoSuchEntityException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -297,18 +297,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    @Transactional
-    public void addPartnerTrainer(PartnerTrainer partnerTrainer) {
-        try {
-            em.persist(partnerTrainer);
-        } catch (Exception ex) {
-            log.error("Could not persis partner trainer relationship", ex);
-        }
-    }
-
-    @Override
     public List<User> getTrainersForPartner(String id) {
-        return em.createQuery("SELECT pt.trainer from PartnerTrainer pt WHERE pt.partner.id = :id")
+        return em.createQuery("SELECT pt from Trainer pt WHERE pt.partner.id = :id")
                 .setParameter("id", id).getResultList();
     }
 
@@ -386,6 +376,41 @@ public class UserRepositoryImpl implements UserRepository {
 
         } catch(Exception ex) {
             return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public TrainerInformation getTrainerInfoForPartner(String memberId, String partnerId) {
+        try{
+            return (TrainerInformation) em.createQuery("SELECT FROM Trainer t WHERE t.partner = :partnerId AND t.trainerUser = :trainerId")
+                    .setParameter("partnerId", partnerId)
+                    .setParameter("trainerId", memberId)
+                    .getSingleResult();
+        } catch(NoSuchEntityException ex) {
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeTrainerInformation(String partnerId, String memberId) {
+        try{
+            em.createQuery("DELETE FROM Trainer p WHERE p.partner = :partnerId AND p.trainerUser = :trainerId")
+                    .setParameter("partnerId", partnerId)
+                    .setParameter("trainerId", memberId)
+                    .executeUpdate();
+        } catch(Exception ex) {
+            log.error("Could not delete partner trainer record", ex);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateTrainerInformation(TrainerInformation existingTrainerInformation) {
+        try{
+            em.merge(existingTrainerInformation);
+        } catch(Exception ex) {
+            log.error("Could not merge trainer information", ex);
         }
     }
 

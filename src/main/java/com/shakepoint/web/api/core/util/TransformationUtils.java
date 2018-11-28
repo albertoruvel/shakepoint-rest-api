@@ -411,6 +411,7 @@ public class TransformationUtils {
         trainerInformation.setPartner(partner.getId());
         trainerInformation.setTrainerUser(trainer.getId());
         trainerInformation.setRegistrationDate(ShakeUtils.SIMPLE_DATE_FORMAT.format(new Date()));
+        trainerInformation.setActive(true);
         return trainerInformation;
     }
 

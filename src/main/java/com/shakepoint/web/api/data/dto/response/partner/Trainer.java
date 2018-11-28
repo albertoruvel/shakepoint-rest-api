@@ -43,4 +43,5 @@ public class Trainer {
     public void setRegistrationDate(String registrationDate) {
         this.registrationDate = registrationDate;
     }
+
 }
