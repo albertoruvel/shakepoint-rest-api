@@ -36,4 +36,18 @@ public class PartnerResource {
         return partnerRestService.getTrainers();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("searchTrainers")
+    public Response searchTrainers(@QueryParam("email") String email) {
+        return partnerRestService.searchTrainers(email);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("convertUser")
+    public Response convertUser(String memberId, String convertType) {
+        return partnerRestService.convertUser(memberId, convertType);
+    }
+
 }

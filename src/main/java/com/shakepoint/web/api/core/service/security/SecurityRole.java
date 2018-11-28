@@ -27,4 +27,8 @@ public enum SecurityRole {
         }
     }
 
+    @Override
+    public String toString() {
+        return value;
+    }
 }

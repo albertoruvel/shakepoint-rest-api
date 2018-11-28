@@ -61,4 +61,7 @@ public interface UserRepository {
     public void updateUser(User user);
 
     public void updateFcmToken(String fcmToken, String id);
+
+    public List<User> searchMembersByEmail(String email);
+
 }

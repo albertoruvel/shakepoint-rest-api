@@ -17,6 +17,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -373,6 +374,18 @@ public class UserRepositoryImpl implements UserRepository {
                     .executeUpdate();
         }catch(Exception ex) {
             log.error("Could not set fcm token ", ex);
+        }
+    }
+
+    @Override
+    public List<User> searchMembersByEmail(String email) {
+        try{
+            return em.createQuery("SELECT u FROM User u WHERE u.email LIKE :email")
+                    .setParameter("email", "%" + email + "%")
+                    .getResultList();
+
+        } catch(Exception ex) {
+            return Collections.emptyList();
         }
     }
 

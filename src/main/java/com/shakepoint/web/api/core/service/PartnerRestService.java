@@ -9,4 +9,8 @@ public interface PartnerRestService {
     public Response createTrainer(CreateTrainerRequest request);
 
     public Response getTrainers();
+
+    public Response searchTrainers(String email);
+
+    public Response convertUser(String memberId, String convertType);
 }
