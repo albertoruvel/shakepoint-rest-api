@@ -1,6 +1,7 @@
 package com.shakepoint.web.api.core.service;
 
 import com.github.roar109.syring.annotation.ApplicationProperty;
+import com.google.gson.Gson;
 import com.shakepoint.integration.jms.client.handler.JmsHandler;
 import com.shakepoint.web.api.core.exception.MandatoryFieldException;
 import com.shakepoint.web.api.core.machine.ProductType;
@@ -39,6 +40,8 @@ import com.shakepoint.web.api.data.dto.response.admin.VendingProductDetails;
 import com.shakepoint.web.api.data.dto.response.admin.VendingProductResponse;
 import com.shakepoint.web.api.data.dto.response.partner.Trainer;
 import com.shakepoint.web.api.data.entity.*;
+import com.shakepoint.web.api.data.fcm.FcmMessageType;
+import com.shakepoint.web.api.data.fcm.FcmNotification;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -90,6 +93,7 @@ public class AdminRestServiceImpl implements AdminRestService {
     @Inject
     private EmailAsyncSender emailSender;
 
+    private static final String FCM_QUEUE_NAME = "fcm_send";
     private static final String MACHINE_CONNECTION_QUEUE_NAME = "machine_connection";
     private static final String DELETE_MEDIA_CONTENT_QUEUE_NAME = "delete_media_content";
     private static final String NUTRITIONAL_DATA_QUEUE_NAME = "nutritional_data";
@@ -607,7 +611,6 @@ public class AdminRestServiceImpl implements AdminRestService {
         //get all trainers
         List<User> trainers = userRepository.getTrainers();
         trainers.stream().forEach(trainer -> {
-            PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(new Date()), "Promoción sugerida", 10, PromoType.TRAINER.getValue());
             //expires last promo code
             //get promo codes that are not expired or cancelled and cancel them
             List<PromoCode> promoCodes = promoCodeRepository.getTrainerPromoCodes(trainer.getId());
@@ -616,14 +619,23 @@ public class AdminRestServiceImpl implements AdminRestService {
                 promoCodeRepository.cancelPromotion(promo);
             });
 
+            PromoCode promoCode = promoCodeManager.createPromoCode(ShakeUtils.SLASHES_SIMPLE_DATE_FORMAT.format(new Date()), "Promoción sugerida", 10, PromoType.TRAINER.getValue());
+            promoCode.setTrainer(trainer);
             //create new one
             promoCodeRepository.createPromoCode(promoCode);
             log.info(String.format("Created new promo code %s for trainer %s", promoCode.getCode(), trainer.getName()));
 
             Map<String, Object> parameters = new HashMap<String, Object>();
             parameters.put("code", promoCode.getCode());
-            if (trainer.isEmailsEnabled()) {
-                emailSender.sendEmail(trainer.getEmail(), Template.TRAINER_DAILY_PROMO, parameters);
+            if (trainer.isNotificationsEnabled()) {
+                //create notification
+                if (trainer.getFcmToken() != null) {
+                    FcmNotification notification = FcmNotification.createNotification(FcmMessageType.SUGGESTED_PROMO_CODE,
+                            "Tu promoción sugerida ha sido actualizada", "Promoción sugerida", trainer.getFcmToken(),
+                            null);
+                    jmsHandler.send(FCM_QUEUE_NAME, new Gson().toJson(notification));
+                }
+
             }
         });
     }
